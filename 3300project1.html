@@ -4,20 +4,40 @@
 <!-- Load the d3 library. -->
 <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 <script src="http://d3js.org/topojson.v1.min.js"></script>
+
+<!-- Move to different file! -->
+<style>
+	.scxAxis, .scyAxis path {
+		fill: none;
+		stroke: black;
+	}
+	.scxAxis, .scyAxis text {
+		font-size: 8px;
+		font: "Open Sans";
+	}
+</style>
+
+
 </head>
 
 <div id="map"></div>
+
+<div id="scatter"></div>
+
 <script>
-var width = 960,
-    height = 500;
+
+/************ US Map ************/ 
+
+var mapWidth = 960,
+    mapHeight = 500;
 
 var projection = d3.geo.albersUsa();
 
 var path = d3.geo.path().projection(projection);
 	
 var svg = d3.select("#map").append("svg")
-    .attr("width", width)
-    .attr("height", height);
+    .attr("width", mapWidth)
+    .attr("height", mapHeight);
 
 var states;
 
@@ -35,8 +55,8 @@ d3.json("us.json", function(error, shapes) {
 	.style("fill", function (state) { return digitScale(state.Percent); })
 	.style("stroke", "#ccc");
 	
-		d3.csv("Graph1Data.csv", function (error, rows) {
-		if (error) {console.log(error);}
+	d3.csv("Graph1Data.csv", function (error, rows) {
+	if (error) {console.log(error);}
 		
 		// what should we do with the CSV data?
 		stateAtlas = d3.map(rows, function (state) { 
@@ -56,8 +76,66 @@ d3.json("us.json", function(error, shapes) {
 		
 	});
 		
-	});
-	
+});
 
+/************ Scatter Plot ************/ 
+var scMargin = {top: 20, right: 20, bottom: 30, left: 40}
+var scatterWidth = 800 - scMargin.left - scMargin.right
+var scatterHeight = 400 - scMargin.top - scMargin.bottom
+
+var svg = d3.select("#scatter").append("svg")
+    .attr("width", scatterWidth)
+    .attr("height", scatterHeight);
+
+var scatterxVal = function(d) { return d.Percent; },
+	scatterxScale = d3.scale.linear().range([0, scatterWidth]),
+	scatterxMap = function(d) { return scatterxScale(scatterxVal(d)); }
+	scatterxAxis = d3.svg.axis().scale(scatterxScale).orient("bottom");
+
+var scatteryVal = function(d) { return d.Income; },
+	scatteryScale = d3.scale.linear().range([scatterHeight,0]),
+	scatteryMap = function(d) { return scatteryScale(scatteryVal(d)); },
+	scatteryAxis = d3.svg.axis().scale(scatteryScale).orient("left");
+
+var svg = d3.select("body").append("svg")
+	.attr("width", scatterWidth	+ scMargin.left + scMargin.right )
+	.attr("height", scatterHeight + scMargin.top + scMargin.bottom )
+	.append ("g")
+		.attr("transform", "translate(" + scMargin.left + "," + scMargin.top + ")");
+
+// Fill Color
+var scatterCVal = function(d) { return d.Id; };
+var color = d3.scale.category20c();
+
+d3.csv("Graph1Data.csv", function (error, rows) {
+	if (error) {console.log(error);}
+	rows.forEach(function(d) {
+		d.Income = +d.Income;
+		d.Percent = +d.Percent;
+	});
+
+	scatterxScale.domain([d3.min(rows, scatterxVal)-1, d3.max(rows, scatterxVal)+1]);
+	scatteryScale.domain([d3.min(rows, scatteryVal)-1, d3.max(rows, scatteryVal)+1]);
+
+	svg.selectAll(".dot")
+		.data(rows)
+	 .enter().append("circle")
+	 .attr("class", "dot")
+	 .attr("r", 3.5)
+	 .attr("cx", scatterxMap)
+	 .attr("cy", scatteryMap)
+	 .style("fill", function(d) {
+	 	color(scatterCVal(d)%20);
+	 });
+
+	 svg.append("g") 
+	 	.attr("class", "scxAxis")
+	 	.attr("transform", "translate(0," + scatterHeight + ")")
+	 	.call(scatterxAxis);
+	 svg.append("g")
+	 	.attr("class", "scyAxis")
+	 	.call(scatteryAxis)
+
+});
 </script>
 </html>

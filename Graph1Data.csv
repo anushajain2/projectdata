@@ -1,52 +1,52 @@
-State,Percent,Id
-Alabama,13.1,1
-Alaska,8.2,2
-Arizona,10,4
-Arkansas,12.5,5
-California,11,6
-Colorado,10,8
-Connecticut,9.5,9
-Delaware,11,10
-District of Columbia,7.9,11
-Florida,11.8,12
-Georgia,10.6,13
-Hawaii,7.6,15
-Idaho,10.2,16
-Illinois,9.8,17
-Indiana,11,18
-Iowa,7.1,19
-Kansas,8.5,20
-Kentucky,13.9,21
-Louisiana,12.5,22
-Maine,11.4,23
-Maryland,9.7,24
-Massachusetts,9.3,25
-Michigan,10.7,26
-Minnesota,7.3,27
-Mississippi,12.6,28
-Missouri,12.4,29
-Montana,10.1,30
-Nebraska,8.1,31
-Nevada,11.6,32
-New Hampshire,9.4,33
-New Jersey,10.7,34
-New Mexico,13.3,35
-New York,10.5,36
-North Carolina,11.5,37
-North Dakota,6.6,38
-Ohio,11.9,39
-Oklahoma,13.5,40
-Oregon,11,41
-Pennsylvania,10.6,42
-Rhode Island,10.9,44
-South Carolina,11.9,45
-South Dakota,7.1,46
-Tennessee,10,47
-Texas,10.8,48
-Utah,9.5,49
-Vermont,9.5,50
-Virginia,10,51
-Washington,10.5,53
-West Virginia,14.9,54
-Wisconsin,8.6,55
-Wyoming,9.7,56
+State,Percent,Id,Income
+Alabama,13.1,1,37993
+Alaska,8.2,2,42580
+Arizona,10,4,33987
+Arkansas,12.5,5,36001
+California,11,6,36682
+Colorado,10,8,40711
+Connecticut,9.5,9,49739
+Delaware,11,10,39269
+District of Columbia,7.9,11,57878
+Florida,11.8,12,38284
+Georgia,10.6,13,36677
+Hawaii,7.6,15,35035
+Idaho,10.2,16,33832
+Illinois,9.8,17,41059
+Indiana,11,18,37045
+Iowa,7.1,19,43108
+Kansas,8.5,20,42541
+Kentucky,13.9,21,36632
+Louisiana,12.5,22,40197
+Maine,11.4,23,37880
+Maryland,9.7,24,44431
+Massachusetts,9.3,25,46999
+Michigan,10.7,26,36515
+Minnesota,7.3,27,43193
+Mississippi,12.6,28,35068
+Missouri,12.4,29,40875
+Montana,10.1,30,36320
+Nebraska,8.1,31,43599
+Nevada,11.6,32,36177
+New Hampshire,9.4,33,41629
+New Jersey,10.7,34,44012
+New Mexico,13.3,35,34557
+New York,10.5,36,42403
+North Carolina,11.5,37,38248
+North Dakota,6.6,38,47808
+Ohio,11.9,39,39748
+Oklahoma,13.5,40,39493
+Oregon,11,41,35917
+Pennsylvania,10.6,42,41650
+Rhode Island,10.9,44,42763
+South Carolina,11.9,45,35606
+South Dakota,7.1,46,46043
+Tennessee,10,47,38705
+Texas,10.8,48,38978
+Utah,9.5,49,33007
+Vermont,9.5,50,39757
+Virginia,10,51,42867
+Washington,10.5,53,40714
+West Virginia,14.9,54,35453
+Wisconsin,8.6,55,41131
+Wyoming,9.7,56,46281
