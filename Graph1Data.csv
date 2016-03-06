@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 State,Percent,Id,Income,pVeterans,,,,,,,,,,, (Source: https://www.washingtonpost.com/blogs/govbeat/wp/2014/11/11/what-each-states-veteran-population-looks-like-in-10-maps/)
 Alabama,13.1,1,37993,9,,,,,,,,,,,
 Alaska,8.2,2,42580,10,,,,,,,,,,,
@@ -50,3 +51,57 @@ Washington,10.5,53,40714,9,,,,,,,,,,,
 West Virginia,14.9,54,35453,9,,,,,,,,,,,
 Wisconsin,8.6,55,41131,7,,,,,,,,,,,
 Wyoming,9.7,56,46281,9,,,,,,,,,,,
+=======
+State,Percent,Id,Income,Population,Tag
+Alabama,13.1,1,37993,4779736,AL
+Alaska,8.2,2,42580,710231,AK
+Arizona,10,4,33987,6392017,AZ
+Arkansas,12.5,5,36001,2915918,AR
+California,11,6,36682,37253956,CA
+Colorado,10,8,40711,5029196,CO
+Connecticut,9.5,9,49739,3574097,CT
+Delaware,11,10,39269,897934,DE
+District of Columbia,7.9,11,57878,601723,DC
+Florida,11.8,12,38284,18801310,FL
+Georgia,10.6,13,36677,9687653,GA
+Hawaii,7.6,15,35035,1360301,HI
+Idaho,10.2,16,33832,1567582,ID
+Illinois,9.8,17,41059,12830632,IL
+Indiana,11,18,37045,6483802,IN
+Iowa,7.1,19,43108,3046355,IA
+Kansas,8.5,20,42541,2853118,KS
+Kentucky,13.9,21,36632,4339367,KY
+Louisiana,12.5,22,40197,4533372,LA
+Maine,11.4,23,37880,1328361,ME
+Maryland,9.7,24,44431,5773552,MD
+Massachusetts,9.3,25,46999,6547629,MA
+Michigan,10.7,26,36515,9883640,MI
+Minnesota,7.3,27,43193,5303925,MN
+Mississippi,12.6,28,35068,2967297,MS
+Missouri,12.4,29,40875,5988927,MO
+Montana,10.1,30,36320,989415,MT
+Nebraska,8.1,31,43599,1826341,NE
+Nevada,11.6,32,36177,2700551,NV
+New Hampshire,9.4,33,41629,1316470,NH
+New Jersey,10.7,34,44012,8791894,NJ
+New Mexico,13.3,35,34557,2059179,NM
+New York,10.5,36,42403,19378102,NY
+North Carolina,11.5,37,38248,9535483,NC
+North Dakota,6.6,38,47808,672591,ND
+Ohio,11.9,39,39748,11536504,OH
+Oklahoma,13.5,40,39493,3751351,OK
+Oregon,11,41,35917,3831074,OR
+Pennsylvania,10.6,42,41650,12702379,PA
+Rhode Island,10.9,44,42763,1052567,RI
+South Carolina,11.9,45,35606,4625364,SC
+South Dakota,7.1,46,46043,814180,SD
+Tennessee,10,47,38705,6346105,TN
+Texas,10.8,48,38978,25145561,TX
+Utah,9.5,49,33007,2763885,UT
+Vermont,9.5,50,39757,625741,VT
+Virginia,10,51,42867,8001024,VA
+Washington,10.5,53,40714,6724540,WA
+West Virginia,14.9,54,35453,1852994,WV
+Wisconsin,8.6,55,41131,5686986,WI
+Wyoming,9.7,56,46281,563626,WY
+>>>>>>> 624cc9652564fc3dc9bf3683d28f0e2f916f38c1
