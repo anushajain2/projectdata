@@ -15,12 +15,22 @@
 		font-size: 8px;
 		font: "Open Sans";
 	}
+	text{
+		font-family:"Open Sans";
+	}
 </style>
 
 
 </head>
 
 <div id="map"></div>
+<defs>
+	<linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#fff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#de2d26;stop-opacity:1" />
+    </linearGradient>
+</defs>
+
 
 <div id="scatter"></div>
 
@@ -42,7 +52,8 @@ var svg = d3.select("#map").append("svg")
 var states;
 
 var digitScale = d3.scale.category10()
-var percentScale = d3.scale.linear().domain([0, 10, 15]).range(["#fee0d2", "#fc9272", "#de2d26"]);
+var percentScale = d3.scale.linear().domain([1, 10, 15]).range(["#fff", "#fdae6b", "#de2d26"]);
+var popScale = d3.scale.linear().domain([500000,40000000]).range([15,35]);
 
 var stateAtlas;
 
@@ -50,30 +61,93 @@ d3.json("us.json", function(error, shapes) {
 	states = topojson.feature(shapes, shapes.objects.states).features;
 
 	var statePaths = svg.append("g");
+	// var stateCircles = svg.append("g");
+	var stateTags = svg.append("g");
+
+	// stateCircles.selectAll("path").data(states).enter()
+	// .append("circle")
+	// .attr("cx",function(state){
+	// 	return path.centroid(state)[0]
+	// 	})
+	// .attr("cy",function(state){
+	// 	return path.centroid(state)[1]
+	// 	})
+	// .attr("id",function(state){
+	// 	return state.id;
+	// 	})
+	// .attr("stroke","black")
+	// .attr("stroke-width","0.25px")
+	// .attr("opacity",0.8);
+
+	stateTags.selectAll("path").data(states).enter()
+	.append("text")
+	.attr("x",function(state){
+		return (path.centroid(state)[0])
+		})
+	.attr("y",function(state){
+		if(state.id=="11"){ return path.centroid(state)[1]+5;}
+		else{return path.centroid(state)[1]}
+		})
+	.attr("font-size","10px")
+	.attr("id",function(state){
+		return state.id;
+		})
+	.attr("text-anchor","middle")
+	.attr("dominant-baseline","middle");
+
 	statePaths.selectAll("path").data(states).enter()
 	.append("path").attr("d", path)
-	.style("fill", function (state) { return digitScale(state.Percent); })
-	.style("stroke", "#ccc");
+	.style("stroke", "#000")
+	.style("stroke-opacity",1)
+	.style("stroke-width",2)
+	.style("font-weight","bold")
+	.style("fill","none");
+
 	
 	d3.csv("Graph1Data.csv", function (error, rows) {
 	if (error) {console.log(error);}
 		
-		// what should we do with the CSV data?
 		stateAtlas = d3.map(rows, function (state) { 
 			return Number(state.Id); 
 		});
-		
+
 		statePaths.selectAll("path")
-		.style("fill", function (state) {
-			var stateData = stateAtlas.get(state.id);
-			console.log("stateData for "+state.id +" is "+stateData);
-			if (! stateData) {return "none";}
-			for (var x=0; x<49; x++){
-				console.log("id " + stateData.Id+", name " +stateData.State+", percent "+stateData.Percent);
-			}
-			return percentScale(stateData.Percent);
-		});
+		.style("stroke",
+			function (state) {
+				var stateData = stateAtlas.get(state.id);
+				if (! stateData) {return "none";}
+			// for (var x=0; x<49; x++){
+			// 	console.log("id " + stateData.Id+", name " +stateData.State+", percent "+stateData.Percent);
+			// }
+				return percentScale(stateData.Percent);
+			})
+		.style("fill",
+			function(state) {
+				var stateData = stateAtlas.get(state.id);
+				if(!stateData) {return "none";}
+				return percentScale(stateData.Percent);
+			});
+
+		// stateCircles.selectAll("circle")
+		// .style("fill",
+		//  	function(circle){
+		// 		var stateData = stateAtlas.get(circle.id)
+		// 		if (! stateData) {return "none";}
+		// 		return percentScale(stateData.Percent);
+		//  	})
+		// .style("r",
+		// 	function(circle){
+		// 		var stateData = stateAtlas.get(circle.id)
+		// 		if (! stateData) {return "none";}
+		// 		return popScale(stateData.Population);
+		// 	});
 		
+		stateTags.selectAll("text")
+		.text(function(text){
+			var stateData = stateAtlas.get(text.id)
+			if (!stateData) {return "none";}
+			return stateData.Tag;
+		});
 	});
 		
 });
