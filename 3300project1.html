@@ -18,6 +18,20 @@
 	text{
 		font-family:"Open Sans";
 	}
+.topstate { 
+  position: relative;
+}
+
+.topstate:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: -1;
+  box-shadow: -5px 5px 20px 5px #000;
+}
 </style>
 
 
@@ -30,6 +44,7 @@
       <stop offset="100%" style="stop-color:#de2d26;stop-opacity:1" />
     </linearGradient>
 </defs>
+
 
 
 <div id="scatter"></div>
@@ -59,6 +74,29 @@ var stateAtlas;
 
 d3.json("us.json", function(error, shapes) {
 	states = topojson.feature(shapes, shapes.objects.states).features;
+
+var defs = svg.append("defs");
+
+var filter = defs.append("filter")
+    .attr("id", "drop-shadow")
+    .attr("height", "130%");
+
+filter.append("feGaussianBlur")
+    .attr("in", "SourceAlpha")
+    .attr("stdDeviation", 5)
+    .attr("result", "blur");
+
+filter.append("feOffset")
+    .attr("in", "blur")
+    .attr("dx", 4)
+    .attr("dy", 4)
+    .attr("result", "offsetBlur");
+
+var feMerge = filter.append("feMerge");
+feMerge.append("feMergeNode")
+    .attr("in", "offsetBlur")
+feMerge.append("feMergeNode")
+    .attr("in", "SourceGraphic");
 
 	var statePaths = svg.append("g");
 	// var stateCircles = svg.append("g");
@@ -98,10 +136,7 @@ d3.json("us.json", function(error, shapes) {
 	statePaths.selectAll("path").data(states).enter()
 	.append("path").attr("d", path)
 	.style("stroke", "#000")
-	.style("stroke-opacity",1)
-	.style("stroke-width",2)
-	.style("font-weight","bold")
-	.style("fill","none");
+	.style("stroke-width",1);
 
 	
 	d3.csv("Graph1Data.csv", function (error, rows) {
@@ -126,6 +161,33 @@ d3.json("us.json", function(error, shapes) {
 				var stateData = stateAtlas.get(state.id);
 				if(!stateData) {return "none";}
 				return percentScale(stateData.Percent);
+			})
+		.style("filter",
+			function(state){
+				var stateData = stateAtlas.get(state.id);
+				if(!stateData){return "none";}
+				if(stateData.Percent<=8.6){
+					return "url(#drop-shadow)";
+				}
+				if((stateData.Percent>=11.9) && (stateData.Id!=39)){
+					return "url(#drop-shadow)";
+				}else{
+					return "none";
+				}
+			})
+		.attr("class","topstate")
+		.style("stroke",
+			function(state){
+				var stateData = stateAtlas.get(state.id);
+				if(!stateData){return "none";}
+				if(stateData.Percent<=8.6){
+					return "black";
+				}
+				if((stateData.Percent>=11.9) && (stateData.Id!=39)){
+					return "white";
+				}else{
+					return "none";
+				}
 			});
 
 		// stateCircles.selectAll("circle")
@@ -147,7 +209,8 @@ d3.json("us.json", function(error, shapes) {
 			var stateData = stateAtlas.get(text.id)
 			if (!stateData) {return "none";}
 			return stateData.Tag;
-		});
+		})
+		.attr("font-weight","bold");
 	});
 		
 });
