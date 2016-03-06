@@ -22,18 +22,21 @@
 		font-family:"Open Sans";
 	}
 .topstate { 
+  z-index:1;
   position: relative;
+}
+.botstate{
+  z-index:-1;
+  position:relative;
 }
 
 .topstate:before {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
   z-index: -1;
-  box-shadow: -5px 5px 20px 5px #000;
+  position:absolute;
+}
+.topstate:after {
+  z-index: -1;
+  position:absolute;
 }
 </style>
 
@@ -93,8 +96,8 @@ filter.append("feGaussianBlur")
 
 filter.append("feOffset")
     .attr("in", "blur")
-    .attr("dx", 4)
-    .attr("dy", 4)
+    .attr("dx", 3)
+    .attr("dy", 3)
     .attr("result", "offsetBlur");
 
 var feMerge = filter.append("feMerge");
@@ -120,12 +123,8 @@ feMerge.append("feMergeNode")
 		statePaths.selectAll("path")
 		.style("fill", function (state) {
 			var stateData = stateAtlas.get(state.id);
-			console.log("stateData for "+state.id +" is "+stateData);
 			if (! stateData) {return "none";}
-			for (var x=0; x<49; x++){
-				console.log("id " + stateData.Id+", name " +stateData.State+", percent "+stateData.Percent);
-				}
-				return percentScale(stateData.Percent);
+			return percentScale(stateData.Percent);
 			});
 			
 		});
@@ -168,7 +167,7 @@ feMerge.append("feMergeNode")
 	statePaths.selectAll("path").data(states).enter()
 	.append("path").attr("d", path)
 	.style("stroke", "#000")
-	.style("stroke-width",1);
+	.style("stroke-width",2);
 
 	
 	d3.csv("Graph1Data.csv", function (error, rows) {
@@ -194,28 +193,39 @@ feMerge.append("feMergeNode")
 				if(!stateData) {return "none";}
 				return percentScale(stateData.Percent);
 			})
+		.attr("class",function(state){
+			var stateData = stateAtlas.get(state.id);
+			if(!stateData) {return "none";}
+			if(stateData.Percent <= 7.6){
+				return "topstate";
+			}
+			if(stateData.Percent>=13.1){
+				return "topstate";
+			}else{
+				return "botstate";
+			}
+		})
 		.style("filter",
 			function(state){
 				var stateData = stateAtlas.get(state.id);
 				if(!stateData){return "none";}
-				if(stateData.Percent<=8.6){
+				if(stateData.Percent<=7.6){
 					return "url(#drop-shadow)";
 				}
-				if((stateData.Percent>=11.9) && (stateData.Id!=39)){
+				if(stateData.Percent>=13.1){
 					return "url(#drop-shadow)";
 				}else{
 					return "none";
 				}
 			})
-		.attr("class","topstate")
 		.style("stroke",
 			function(state){
 				var stateData = stateAtlas.get(state.id);
 				if(!stateData){return "none";}
-				if(stateData.Percent<=8.6){
+				if(stateData.Percent<=7.6){
 					return "black";
 				}
-				if((stateData.Percent>=11.9) && (stateData.Id!=39)){
+				if(stateData.Percent>=13.1){
 					return "white";
 				}else{
 					return "none";
