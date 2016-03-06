@@ -279,11 +279,15 @@ d3.csv("Graph1Data.csv", function (error, rows) {
 			.enter()
 			.append("text")
 			.text(function(d) {
-				return d.State + "\n" + d.Percent;
-			});
-			// .attr("x", function(d) {
-
-			// });
+				return d.Tag + "\t" + d.Percent;
+			})
+			.attr("x", function(d) {
+				return scatterxMap(d);
+			})
+			.attr("y", function(d) {
+				return scatteryMap(d);
+			})
+			.attr("font-size", "8px");
 
 		 scattersvg.append("g") 
 		 	.attr("class", "scxAxis")
