@@ -21,6 +21,13 @@
 	text{
 		font-family:"Open Sans";
 	}
+	.grid .tick {
+    stroke: #d3d3d3;
+    opacity: 0.7;
+	}	
+	.grid path {
+	      stroke-width: 0;
+	}
 </style>
 
 
@@ -87,11 +94,7 @@
 			statePaths.selectAll("path")
 			.style("fill", function (state) {
 				var stateData = stateAtlas.get(state.id);
-				console.log("stateData for "+state.id +" is "+stateData);
 				if (! stateData) {return "none";}
-				for (var x=0; x<49; x++){
-					console.log("id " + stateData.Id+", name " +stateData.State+", percent "+stateData.Percent);
-				}
 				return percentScale(stateData.Percent);
 			});
 			
@@ -279,7 +282,7 @@ d3.csv("Graph1Data.csv", function (error, rows) {
 			.enter()
 			.append("text")
 			.text(function(d) {
-				return d.Tag + "\t" + d.Percent;
+				return d.Tag;
 			})
 			.attr("x", function(d) {
 				return scatterxMap(d);
@@ -289,6 +292,7 @@ d3.csv("Graph1Data.csv", function (error, rows) {
 			})
 			.attr("font-size", "8px");
 
+		// Creating x,y axis
 		 scattersvg.append("g") 
 		 	.attr("class", "scxAxis")
 		 	.attr("transform", "translate(0," + scatterHeight + ")")
@@ -296,9 +300,55 @@ d3.csv("Graph1Data.csv", function (error, rows) {
 		 scattersvg.append("g")
 		 	.attr("class", "scyAxis")
 		 	.call(scatteryAxis);
-	
+		// creating x,y grid lines
+		// scattersvg.append("g")
+		// 	.attr("class", "grid")
+		// 	.attr("transform", "translate(0," + scatterHeight + ")")
+		// 	.call(makeXGrid()
+		// 		.tickSize(-scatterHeight, 0, 0)
+  //           	.tickFormat("")
+		// 	)
+		// scattersvg.append("g")
+		// 	.attr("class", "grid")
+		// 	.call(makeYGrid()
+		// 		.tickSize(-scatterWidth, 0, 0)
+  //           	.tickFormat("")
+		// 	)
+
+		var numTicks = 10
+
+		var yAxisGrid = scatteryAxis.ticks(numTicks)
+			.tickSize(scatterWidth, 0)
+			.tickFormat("")
+			.orient("right");
+		var xAxisGrid = scatterxAxis.ticks(numTicks)
+			.tickSize(-scatterHeight, 0)
+			.tickFormat("")
+			.orient("top");
+		scattersvg.append("g")
+			.attr("class", "grid")
+			.call(yAxisGrid)
+		scattersvg.append("g")
+			.attr("class", "grid")
+			.call(xAxisGrid)
+
 
 	});
+	function makeXGrid() {
+		console.log("xcalled")
+		return d3.svg.axis()
+			.scale(scatterxVal)
+			.orient("bottom")
+			.ticks(10)
+	}
+	function makeYGrid() {
+		console.log("ycalled")
+		return d3.svg.axis()
+			.scale(scatteryVal)
+			.orient("left")
+			.ticks(10)
+	}
+
 });
 </script>
 </body>
