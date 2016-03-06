@@ -13,124 +13,149 @@
 	}
 	.scxAxis, .scyAxis text {
 		font-size: 8px;
-		font: "Open Sans";
+		font-family: "Open Sans";
+	}
+	body {
+		font-family: "Open Sans";
 	}
 </style>
 
 
 </head>
 
-<div id="map"></div>
+<body>
 
-<div id="scatter"></div>
+	<div id="map"></div>
 
-<script>
+	<div id="scatter"></div>
 
-/************ US Map ************/ 
 
-var mapWidth = 960,
-    mapHeight = 500;
+	<script>
 
-var projection = d3.geo.albersUsa();
+	/************ US Map ************/ 
 
-var path = d3.geo.path().projection(projection);
-	
-var svg = d3.select("#map").append("svg")
-    .attr("width", mapWidth)
-    .attr("height", mapHeight);
+	var mapWidth = 960,
+	    mapHeight = 500;
 
-var states;
+	var projection = d3.geo.albersUsa();
 
-var digitScale = d3.scale.category10()
-var percentScale = d3.scale.linear().domain([0, 10, 15]).range(["#fee0d2", "#fc9272", "#de2d26"]);
+	var path = d3.geo.path().projection(projection);
+		
+	var svg = d3.select("#map").append("svg")
+	    .attr("width", mapWidth)
+	    .attr("height", mapHeight);
 
-var stateAtlas;
+	var states;
 
-d3.json("us.json", function(error, shapes) {
-	states = topojson.feature(shapes, shapes.objects.states).features;
+	var digitScale = d3.scale.category10()
+	var percentScale = d3.scale.linear().domain([0, 10, 15]).range(["#fee0d2", "#fc9272", "#de2d26"]);
 
-	var statePaths = svg.append("g");
-	statePaths.selectAll("path").data(states).enter()
-	.append("path").attr("d", path)
-	.style("fill", function (state) { return digitScale(state.Percent); })
-	.style("stroke", "#ccc");
-	
+	var stateAtlas;
+
+	d3.json("us.json", function(error, shapes) {
+		states = topojson.feature(shapes, shapes.objects.states).features;
+
+		var statePaths = svg.append("g");
+		statePaths.selectAll("path").data(states).enter()
+		.append("path").attr("d", path)
+		.style("fill", function (state) { return digitScale(state.Percent); })
+		.style("stroke", "#ccc");
+		
+		d3.csv("Graph1Data.csv", function (error, rows) {
+		if (error) {console.log(error);}
+			
+			// what should we do with the CSV data?
+			stateAtlas = d3.map(rows, function (state) { 
+				return Number(state.Id); 
+			});
+			
+			statePaths.selectAll("path")
+			.style("fill", function (state) {
+				var stateData = stateAtlas.get(state.id);
+				console.log("stateData for "+state.id +" is "+stateData);
+				if (! stateData) {return "none";}
+				for (var x=0; x<49; x++){
+					console.log("id " + stateData.Id+", name " +stateData.State+", percent "+stateData.Percent);
+				}
+				return percentScale(stateData.Percent);
+			});
+			
+		});
+			
+	});
+
+	// Problem: ticks are too far to right
+	/************ Scatter Plot ************/ 
+	var scMargin = {top: 20, right: 20, bottom: 30, left: 40}
+	var scatterWidth = 800 - scMargin.left - scMargin.right
+	var scatterHeight = 400 - scMargin.top - scMargin.bottom
+
+	var scatterxVal = function(d) { return d.Percent; },
+		scatterxScale = d3.scale.linear().range([0, scatterWidth]),
+		scatterxMap = function(d) { return scatterxScale(scatterxVal(d)); }
+		scatterxAxis = d3.svg.axis().scale(scatterxScale).orient("bottom");
+
+	var scatteryVal = function(d) { return d.Income; },
+		scatteryScale = d3.scale.linear().range([scatterHeight,0]),
+		scatteryMap = function(d) { return scatteryScale(scatteryVal(d)); },
+		scatteryAxis = d3.svg.axis().scale(scatteryScale).orient("left");
+
+
+	var scattersvg = d3.select("body").append("svg")
+		.attr("width", scatterWidth	+ scMargin.left + scMargin.right )
+		.attr("height", scatterHeight + scMargin.top + scMargin.bottom )
+		.append ("g")
+			.attr("transform", "translate(" + scMargin.left + "," + scMargin.top + ")");
+
+	// Fill Color
+	var scatterCVal = function(d) { return d.Id; };
+	var color = d3.scale.category20c();
+
 	d3.csv("Graph1Data.csv", function (error, rows) {
-	if (error) {console.log(error);}
-		
-		// what should we do with the CSV data?
-		stateAtlas = d3.map(rows, function (state) { 
-			return Number(state.Id); 
+		if (error) {console.log(error);}
+		rows.forEach(function(d) {
+			d.Income = +d.Income;
+			d.Percent = +d.Percent;
 		});
-		
-		statePaths.selectAll("path")
-		.style("fill", function (state) {
-			var stateData = stateAtlas.get(state.id);
-			console.log("stateData for "+state.id +" is "+stateData);
-			if (! stateData) {return "none";}
-			for (var x=0; x<49; x++){
-				console.log("id " + stateData.Id+", name " +stateData.State+", percent "+stateData.Percent);
-			}
-			return percentScale(stateData.Percent);
-		});
-		
+
+		scatterxScale.domain([d3.min(rows, scatterxVal)-1, d3.max(rows, scatterxVal)+1]);
+		scatteryScale.domain([d3.min(rows, scatteryVal)-1, d3.max(rows, scatteryVal)+1]);
+
+		scattersvg.selectAll(".dot")
+			.data(rows)
+			 .enter().append("circle")
+			 .attr("class", "dot")
+			 .attr("r", function (d) {
+			 	return (d.pVeterans)
+			 })
+			 .attr("cx", scatterxMap)
+			 .attr("cy", scatteryMap)
+			 // .style("fill", function(d) {
+			 // 	return color(scatterCVal(d)%20);
+			 // });
+			.style("fill", function(d) {
+				return percentScale(d.Percent)
+			});
+
+		scattersvg.selectAll("text")
+			.data(rows)
+			.enter()
+			.append("text")
+			.text(function(d) {
+				return d.State + "\n" + d.Percent;
+			})
+			.attr("x", function(d) {
+
+			});
+
+		 scattersvg.append("g") 
+		 	.attr("class", "scxAxis")
+		 	.attr("transform", "translate(0," + scatterHeight + ")")
+		 	.call(scatterxAxis);
+		 scattersvg.append("g")
+		 	.attr("class", "scyAxis")
+		 	.call(scatteryAxis)
 	});
-		
-});
-
-/************ Scatter Plot ************/ 
-var scMargin = {top: 20, right: 20, bottom: 30, left: 40}
-var scatterWidth = 800 - scMargin.left - scMargin.right
-var scatterHeight = 400 - scMargin.top - scMargin.bottom
-
-var scatterxVal = function(d) { return d.Percent; },
-	scatterxScale = d3.scale.linear().range([0, scatterWidth]),
-	scatterxMap = function(d) { return scatterxScale(scatterxVal(d)); }
-	scatterxAxis = d3.svg.axis().scale(scatterxScale).orient("bottom");
-
-var scatteryVal = function(d) { return d.Income; },
-	scatteryScale = d3.scale.linear().range([scatterHeight,0]),
-	scatteryMap = function(d) { return scatteryScale(scatteryVal(d)); },
-	scatteryAxis = d3.svg.axis().scale(scatteryScale).orient("left");
-
-var scattersvg = d3.select("body").append("svg")
-	.attr("width", scatterWidth	+ scMargin.left + scMargin.right )
-	.attr("height", scatterHeight + scMargin.top + scMargin.bottom )
-	.append ("g")
-		.attr("transform", "translate(" + scMargin.left + "," + scMargin.top + ")");
-
-// Fill Color
-var scatterCVal = function(d) { return d.Id; };
-var color = d3.scale.category20c();
-
-d3.csv("Graph1Data.csv", function (error, rows) {
-	if (error) {console.log(error);}
-	rows.forEach(function(d) {
-		d.Income = +d.Income;
-		d.Percent = +d.Percent;
-	});
-
-	scatterxScale.domain([d3.min(rows, scatterxVal)-1, d3.max(rows, scatterxVal)+1]);
-	scatteryScale.domain([d3.min(rows, scatteryVal)-1, d3.max(rows, scatteryVal)+1]);
-
-	scattersvg.selectAll(".dot")
-		.data(rows)
-	 .enter().append("circle")
-	 .attr("class", "dot")
-	 .attr("r", 3.5)
-	 .attr("cx", scatterxMap)
-	 .attr("cy", scatteryMap)
-	 .style("fill", function(d) {
-	 	return color(scatterCVal(d)%20);
-	 });
-
-	 scattersvg.append("g") 
-	 	.attr("class", "scxAxis")
-	 	.attr("transform", "translate(0," + scatterHeight + ")")
-	 	.call(scatterxAxis);
-	 scattersvg.append("g")
-	 	.attr("class", "scyAxis")
-	 	.call(scatteryAxis)
-});
-</script>
+	</script>
+</body>
 </html>
