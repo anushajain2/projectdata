@@ -18,29 +18,39 @@
 	body {
 		font-family: "Open Sans";
 	}
-	text{
-		font-family:"Open Sans";
+
+	.botstate{
+	  	z-index:-1;
+	  	position:relative;
 	}
- 
-	.grid .tick {
-    stroke: #d3d3d3;
-    opacity: 0.7;
+
+	.topstate:before {
+	  	z-index: -1;
+	  	position:absolute;
+	}
+
+	.topstate:after {
+	 	z-index: -1;
+	  	position:absolute;
+	}
+
+    .grid .tick {
+    	stroke: #d3d3d3;
+    	opacity: 0.001;
 	}	
+
 	.grid path {
 		stroke-width: 0;
 	}
 
-	.topstate { 
-	  	-moz-box-shadow:    inset 0 0 10px #000000;
-   		-webkit-box-shadow: inset 0 0 10px #000000;
-   		box-shadow:         inset 0 0 10px #000000;
-	}
+
 </style>
 
 
 </head>
 
 <body>
+
 <div id="map"></div>
 <defs>
 	<linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -49,7 +59,6 @@
     </linearGradient>
 </defs>
 
-<div id="map"></div>
 <div id="scatter"></div>
 
 <script>
@@ -82,26 +91,105 @@
 
 	var defs = svg.append("defs");
 
+
+// Adapted from http://www.xanthir.com/b4Yv0; http://jsfiddle.net/kkPM4/
+	// var filter = defs.append("filter")
+	//     .attr("id", "inner-shadow")
+	//     .attr("height", "200%")
+	//     .attr("width", "200%")
+	//     .attr("x", "-50%")
+	//     .attr("y", "-50%")
+
+	// filter.append("feCompenentTransfer")
+	// 	.attr("in", "SourceAlpha")
+	// 	.append("feFuncA")
+	// 		.attr("type", "table")
+	// 		.attr("tableValues", "1 0")
+	// filter.append("feGaussianBlur")
+	//     .attr("stdDeviation", 3)
+
+	// filter.append("feOffset")
+	//     .attr("dx", 3)
+	//     .attr("dy", 3)
+	//     .attr("result", "offsetBlur")
+
+ //    filter.append("feFlood")
+ //    	.attr("flood-color", "rgb(20,0,0)")
+ //    	.attr("result", "color")
+
+ //    filter.append("feComposite")
+ //    	.attr("in", "offsetblur")
+ //    	.attr("operator","in")
+ //    filter.append("feComposite")
+ //    	.attr("in", "SourceAlpha")
+ //    	.attr("operator","in")
+
+ // //    filter.append("feMerge");
+
+	// var feMerge = filter.append("feMerge");
+	// 	feMerge.append("feMergeNode")
+	// 	    .attr("in", "offsetBlur")
+	// 	feMerge.append("feMergeNode")
+	// 	    .attr("in", "SourceGraphic");
+
 	var filter = defs.append("filter")
-	    .attr("id", "drop-shadow")
-	    .attr("height", "130%");
+	    .attr("id", "inset-shadow")
+	    // .attr("height", "200%")
+	    // .attr("width", "200%")
+	    // .attr("x", "-50%")
+	    // .attr("y", "-50%")
+
+	filter.append("feCompenentTransfer")
+		.attr("in", "SourceAlpha")
+		.attr("result", "inset-selection")
+		.append("feFuncA")
+			.attr("type", "discrete")
+			.attr("tableValues", "0 1 1 1 1 1")
+	filter.append("feCompenentTransfer")
+		.attr("in", "SourceAlpha")
+		.attr("result", "original-no-fill")
+		.append("feFuncA")
+			.attr("type", "discrete")
+			.attr("tableValues", "0 0 1")
+	filter.append("feColorMatrix")
+		.attr("type", "matrix")
+		.attr("in", "original-no-fill")
+		.attr("result", "new-source-alpha")
+		.attr("values", "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0")
 
 	filter.append("feGaussianBlur")
 	    .attr("in", "SourceAlpha")
-	    .attr("stdDeviation", 5)
-	    .attr("result", "blur");
+	    .attr("result", "blur")
+	    .attr("stdDeviation", "5")
+	filter.append("feGaussianBlur")
+	    .attr("in", "SourceAlpha")
+	    .attr("result", "blur2")
+	    .attr("stdDeviation", "10")
+	filter.append("feGaussianBlur")
+	    .attr("in", "SourceAlpha")
+	    .attr("result", "blur3")
+	    .attr("stdDeviation", "15")
 
-	filter.append("feOffset")
-	    .attr("in", "blur")
-	    .attr("dx", 4)
-	    .attr("dy", 4)
-	    .attr("result", "offsetBlur");
+    filter.append("feMerge")
 
 	var feMerge = filter.append("feMerge");
-	feMerge.append("feMergeNode")
-	    .attr("in", "offsetBlur")
-	feMerge.append("feMergeNode")
-	    .attr("in", "SourceGraphic");
+		feMerge.attr("result", "result")
+		feMerge.append("feMergeNode")
+		    .attr("in", "blur")
+		feMerge.append("feMergeNode")
+		    .attr("in", "blur2")
+		feMerge.append("feMergeNode")
+		    .attr("in", "blur3")
+
+    filter.append("feComposite")
+    	.attr("operator","in")
+    	.attr("in", "inset-selection")
+    	.attr("in2", "blur")
+    	.attr("result", "inset-blur")
+   	filter.append("feComposite")
+    	.attr("operator","over")
+    	.attr("in", "original-no-fill")
+    	.attr("in2", "inset-blur")
 
 	var statePaths = svg.append("g");
 	statePaths.selectAll("path").data(states).enter()
@@ -116,16 +204,16 @@
 		stateAtlas = d3.map(rows, function (state) { 
 			return Number(state.Id); 
 		});
-			
+
 		statePaths.selectAll("path")
 		.style("fill", function (state) {
 			var stateData = stateAtlas.get(state.id);
 			if (! stateData) {return "none";}
-				return percentScale(stateData.Percent);
+			return percentScale(stateData.Percent);
 			});
 			
 		});
-			
+
 	var statePaths = svg.append("g");
 	// var stateCircles = svg.append("g");
 	var stateTags = svg.append("g");
@@ -164,7 +252,7 @@
 	statePaths.selectAll("path").data(states).enter()
 	.append("path").attr("d", path)
 	.style("stroke", "#000")
-	.style("stroke-width",1);
+	.style("stroke-width",2);
 
 	
 	d3.csv("Graph1Data.csv", function (error, rows) {
@@ -190,29 +278,41 @@
 				if(!stateData) {return "none";}
 				return percentScale(stateData.Percent);
 			})
+		.attr("class",function(state){
+			var stateData = stateAtlas.get(state.id);
+			if(!stateData) {return "none";}
+			if(stateData.Percent <= 7.6){
+				return "topstate";
+			}
+			if(stateData.Percent>=13.1){
+				return "topstate";
+			}else{
+				return "botstate";
+			}
+		})
 		.style("filter",
 			function(state){
 				var stateData = stateAtlas.get(state.id);
 				if(!stateData){return "none";}
-				if(stateData.Percent<=8.6){
-					return "url(#drop-shadow)";
+				if(stateData.Percent<=7.6){
+					return "url(#inner-shadow)";
 				}
-				if((stateData.Percent>=11.9) && (stateData.Id!=39)){
-					return "url(#drop-shadow)";
+				if(stateData.Percent>=13.1){
+					return "url(#inner-shadow)";
 				}else{
 					return "none";
 				}
 			})
-		.attr("class","topstate")
 		.style("stroke",
 			function(state){
 				var stateData = stateAtlas.get(state.id);
 				if(!stateData){return "none";}
-				if(stateData.Percent<=8.6){
+				if(stateData.Percent<=7.6){
 					return "black";
 				}
-				if((stateData.Percent>=11.9) && (stateData.Id!=39)){
-					return "white";
+				if(stateData.Percent>=13.1){
+					// return "white";
+					return "black";
 				}else{
 					return "none";
 				}
@@ -243,37 +343,6 @@
 		
 });
 
-/************ Scatter Plot ************/ 
-var scMargin = {top: 20, right: 20, bottom: 30, left: 40}
-var scatterWidth = 800 - scMargin.left - scMargin.right
-var scatterHeight = 400 - scMargin.top - scMargin.bottom
-
-var scatterxVal = function(d) { return d.Percent; },
-	scatterxScale = d3.scale.linear().range([0, scatterWidth]),
-	scatterxMap = function(d) { return scatterxScale(scatterxVal(d)); }
-	scatterxAxis = d3.svg.axis().scale(scatterxScale).orient("bottom");
-
-var scatteryVal = function(d) { return d.Income; },
-	scatteryScale = d3.scale.linear().range([scatterHeight,0]),
-	scatteryMap = function(d) { return scatteryScale(scatteryVal(d)); },
-	scatteryAxis = d3.svg.axis().scale(scatteryScale).orient("left");
-
-var scattersvg = d3.select("body").append("svg")
-	.attr("width", scatterWidth	+ scMargin.left + scMargin.right )
-	.attr("height", scatterHeight + scMargin.top + scMargin.bottom )
-	.append ("g")
-		.attr("transform", "translate(" + scMargin.left + "," + scMargin.top + ")");
-
-// Fill Color
-var scatterCVal = function(d) { return d.Id; };
-var color = d3.scale.category20c();
-
-d3.csv("Graph1Data.csv", function (error, rows) {
-	if (error) {console.log(error);}
-	rows.forEach(function(d) {
-		d.Income = +d.Income;
-		d.Percent = +d.Percent;
-	});
 
 	// Problem: ticks are too far to right
 	/************ Scatter Plot ************/ 
@@ -283,13 +352,15 @@ d3.csv("Graph1Data.csv", function (error, rows) {
 
 	var scatterxVal = function(d) { return d.Percent; },
 		scatterxScale = d3.scale.linear().range([0, scatterWidth]),
-		scatterxMap = function(d) { return scatterxScale(scatterxVal(d)); }
+		scatterxMap = function(d) { return scatterxScale(scatterxVal(d)); },
 		scatterxAxis = d3.svg.axis().scale(scatterxScale).orient("bottom");
 
 	var scatteryVal = function(d) { return d.Income; },
 		scatteryScale = d3.scale.linear().range([scatterHeight,0]),
 		scatteryMap = function(d) { return scatteryScale(scatteryVal(d)); },
-		scatteryAxis = d3.svg.axis().scale(scatteryScale).orient("left");
+		scatteryAxis = d3.svg.axis()
+						.scale(scatteryScale).orient("left")
+						.ticks(10);
 
 
 	var scattersvg = d3.select("body").append("svg")
@@ -302,6 +373,7 @@ d3.csv("Graph1Data.csv", function (error, rows) {
 	var scatterCVal = function(d) { return d.Id; };
 	var color = d3.scale.category20c();
 
+
 	d3.csv("Graph1Data.csv", function (error, rows) {
 		if (error) {console.log(error);}
 		rows.forEach(function(d) {
@@ -312,36 +384,36 @@ d3.csv("Graph1Data.csv", function (error, rows) {
 		scatterxScale.domain([d3.min(rows, scatterxVal)-1, d3.max(rows, scatterxVal)+1]);
 		scatteryScale.domain([d3.min(rows, scatteryVal)-1, d3.max(rows, scatteryVal)+1]);
 
-		scattersvg.selectAll(".dot")
-			.data(rows)
-			 .enter().append("circle")
-			 .attr("class", "dot")
-			 .attr("r", function (d) {
-			 	return (d.pVeterans)
-			 })
-			 .attr("cx", scatterxMap)
-			 .attr("cy", scatteryMap)
-			 // .style("fill", function(d) {
-			 // 	return color(scatterCVal(d)%20);
-			 // });
-			.style("fill", function(d) {
-				return percentScale(d.Percent)
-			});
+		// scattersvg.selectAll(".dot")
+		// 	.data(rows)
+		// 	 .enter().append("circle")
+		// 	 .attr("class", "dot")
+		// 	 .attr("r", function (d) {
+		// 	 	return (d.pVeterans)
+		// 	 })
+		// 	 .attr("cx", scatterxMap)
+		// 	 .attr("cy", scatteryMap)
+		// 	 // .style("fill", function(d) {
+		// 	 // 	return color(scatterCVal(d)%20);
+		// 	 // });
+		// 	.style("fill", function(d) {
+		// 		return percentScale(d.Percent)
+		// 	});
 
-		scattersvg.selectAll("text")
-			.data(rows)
-			.enter()
-			.append("text")
-			.text(function(d) {
-				return d.Tag;
-			})
-			.attr("x", function(d) {
-				return scatterxMap(d);
-			})
-			.attr("y", function(d) {
-				return scatteryMap(d);
-			})
-			.attr("font-size", "8px");
+		// scattersvg.selectAll("text")
+		// 	.data(rows)
+		// 	.enter()
+		// 	.append("text")
+		// 	.text(function(d) {
+		// 		return d.Tag;
+		// 	})
+		// 	.attr("x", function(d) {
+		// 		return scatterxMap(d);
+		// 	})
+		// 	.attr("y", function(d) {
+		// 		return scatteryMap(d);
+		// 	})
+		// 	.attr("font-size", "8px");
 
 		// Creating x,y axis
 		 scattersvg.append("g") 
@@ -352,6 +424,8 @@ d3.csv("Graph1Data.csv", function (error, rows) {
 		 	.attr("class", "scyAxis")
 		 	.call(scatteryAxis);
 
+
+		// Creating grid lines
 		var numTicks = 10
 
 		var yAxisGrid = scatteryAxis.ticks(numTicks)
@@ -370,6 +444,38 @@ d3.csv("Graph1Data.csv", function (error, rows) {
 			.call(xAxisGrid)
 
 
+		scattersvg.selectAll(".dot")
+			.data(rows)
+			 .enter().append("circle")
+			 .attr("class", "dot")
+			 .attr("r", function (d) {
+			 	return (d.pVeterans)
+			 })
+			 .attr("cx", scatterxMap)
+			 .attr("cy", scatteryMap)
+			 // .style("fill", function(d) {
+			 // 	return color(scatterCVal(d)%20);
+			 // });
+			.style("fill", function(d) {
+				return percentScale(d.Percent)
+			});
+console.log(rows);
+		scattersvg.selectAll("text")
+			.data(rows)
+			.enter()
+			.append("text")
+			.text(function(d) {
+				console.log(d.Tag);
+				return d.Tag;
+			})
+			.attr("x", function(d) {
+				return scatterxMap(d);
+			})
+			.attr("y", function(d) {
+				return scatteryMap(d);
+			})
+			.attr("font-size", "8px")
+console.log(rows);
 	});
 	function makeXGrid() {
 		console.log("xcalled")
@@ -385,8 +491,6 @@ d3.csv("Graph1Data.csv", function (error, rows) {
 			.orient("left")
 			.ticks(10)
 	}
-
-});
 </script>
 </body>
 </html>
