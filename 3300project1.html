@@ -19,19 +19,8 @@
 		font-family: "Open Sans";
 	}
 
-	.botstate{
-	  	z-index:-1;
-	  	position:relative;
-	}
-
-	.topstate:before {
-	  	z-index: -1;
-	  	position:absolute;
-	}
-
-	.topstate:after {
-	 	z-index: -1;
-	  	position:absolute;
+	.topstate{
+	  	stroke: red;
 	}
 
     .grid .tick {
@@ -76,13 +65,10 @@
 	    .attr("height", mapHeight);
 
 	var digitScale = d3.scale.category10()
-	var percentScale = d3.scale.linear().domain([1, 10, 15]).range(["#fff", "#fdae6b", "#de2d26"]);
+	var percentScale = d3.scale.linear().domain([1, 9, 15]).range(["#fff", "#edf8b1", "#ff0000"]);
 	var popScale = d3.scale.linear().domain([500000,40000000]).range([15,35]);
 
 	var states;
-
-	var digitScale = d3.scale.category10()
-	var percentScale = d3.scale.linear().domain([0, 10, 15]).range(["#fee0d2", "#fc9272", "#de2d26"]);
 
 	var stateAtlas;
 
@@ -93,29 +79,29 @@
 
 
 // Adapted from http://www.xanthir.com/b4Yv0; http://jsfiddle.net/kkPM4/
-	// var filter = defs.append("filter")
-	//     .attr("id", "inner-shadow")
-	//     .attr("height", "200%")
-	//     .attr("width", "200%")
-	//     .attr("x", "-50%")
-	//     .attr("y", "-50%")
+	var filter = defs.append("filter")
+	    .attr("id", "inner-shadow")
+	    .attr("height", "200%")
+	    .attr("width", "200%")
+	    .attr("x", "-50%")
+	    .attr("y", "-50%")
 
-	// filter.append("feCompenentTransfer")
-	// 	.attr("in", "SourceAlpha")
-	// 	.append("feFuncA")
-	// 		.attr("type", "table")
-	// 		.attr("tableValues", "1 0")
-	// filter.append("feGaussianBlur")
-	//     .attr("stdDeviation", 3)
+	filter.append("feCompenentTransfer")
+		.attr("in", "SourceAlpha")
+		.append("feFuncA")
+			.attr("type", "table")
+			.attr("tableValues", "1 0")
+	filter.append("feGaussianBlur")
+	    .attr("stdDeviation", 0.5)
 
-	// filter.append("feOffset")
-	//     .attr("dx", 3)
-	//     .attr("dy", 3)
-	//     .attr("result", "offsetBlur")
+	filter.append("feOffset")
+	    .attr("dx", -4)
+	    .attr("dy", -4)
+	    .attr("result", "offsetBlur")
 
- //    filter.append("feFlood")
- //    	.attr("flood-color", "rgb(20,0,0)")
- //    	.attr("result", "color")
+    // filter.append("feFlood")
+    // 	.attr("flood-color", "rgb(20,0,0)")
+    // 	.attr("result", "color")
 
  //    filter.append("feComposite")
  //    	.attr("in", "offsetblur")
@@ -124,7 +110,7 @@
  //    	.attr("in", "SourceAlpha")
  //    	.attr("operator","in")
 
- // //    filter.append("feMerge");
+ //    // filter.append("feMerge");
 
 	// var feMerge = filter.append("feMerge");
 	// 	feMerge.append("feMergeNode")
@@ -132,85 +118,76 @@
 	// 	feMerge.append("feMergeNode")
 	// 	    .attr("in", "SourceGraphic");
 
-	var filter = defs.append("filter")
-	    .attr("id", "inset-shadow")
-	    // .attr("height", "200%")
-	    // .attr("width", "200%")
-	    // .attr("x", "-50%")
-	    // .attr("y", "-50%")
+// ---------insetshadow----------
+	// var filter = defs.append("filter")
+	//     .attr("id", "inset-shadow")
+	//     // .attr("height", "200%")
+	//     // .attr("width", "200%")
+	//     // .attr("x", "-50%")
+	//     // .attr("y", "-50%")
 
-	filter.append("feCompenentTransfer")
-		.attr("in", "SourceAlpha")
-		.attr("result", "inset-selection")
-		.append("feFuncA")
-			.attr("type", "discrete")
-			.attr("tableValues", "0 1 1 1 1 1")
-	filter.append("feCompenentTransfer")
-		.attr("in", "SourceAlpha")
-		.attr("result", "original-no-fill")
-		.append("feFuncA")
-			.attr("type", "discrete")
-			.attr("tableValues", "0 0 1")
-	filter.append("feColorMatrix")
-		.attr("type", "matrix")
-		.attr("in", "original-no-fill")
-		.attr("result", "new-source-alpha")
-		.attr("values", "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0")
+	// filter.append("feCompenentTransfer")
+	// 	.attr("in", "SourceAlpha")
+	// 	.attr("result", "inset-selection")
+	// 	.append("feFuncA")
+	// 		.attr("type", "discrete")
+	// 		.attr("tableValues", "0 1 1 1 1 1")
+	// filter.append("feCompenentTransfer")
+	// 	.attr("in", "SourceAlpha")
+	// 	.attr("result", "original-no-fill")
+	// 	.append("feFuncA")
+	// 		.attr("type", "discrete")
+	// 		.attr("tableValues", "0 0 1")
+	// filter.append("feColorMatrix")
+	// 	.attr("type", "matrix")
+	// 	.attr("in", "original-no-fill")
+	// 	.attr("result", "new-source-alpha")
+	// 	.attr("values", "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0")
 
-	filter.append("feGaussianBlur")
-	    .attr("in", "SourceAlpha")
-	    .attr("result", "blur")
-	    .attr("stdDeviation", "5")
-	filter.append("feGaussianBlur")
-	    .attr("in", "SourceAlpha")
-	    .attr("result", "blur2")
-	    .attr("stdDeviation", "10")
-	filter.append("feGaussianBlur")
-	    .attr("in", "SourceAlpha")
-	    .attr("result", "blur3")
-	    .attr("stdDeviation", "15")
+	// filter.append("feGaussianBlur")
+	//     .attr("in", "SourceAlpha")
+	//     .attr("result", "blur")
+	//     .attr("stdDeviation", "5")
+	// filter.append("feGaussianBlur")
+	//     .attr("in", "SourceAlpha")
+	//     .attr("result", "blur2")
+	//     .attr("stdDeviation", "10")
+	// filter.append("feGaussianBlur")
+	//     .attr("in", "SourceAlpha")
+	//     .attr("result", "blur3")
+	//     .attr("stdDeviation", "15")
 
-    filter.append("feMerge")
+ //    filter.append("feMerge")
 
-	var feMerge = filter.append("feMerge");
-		feMerge.attr("result", "result")
-		feMerge.append("feMergeNode")
-		    .attr("in", "blur")
-		feMerge.append("feMergeNode")
-		    .attr("in", "blur2")
-		feMerge.append("feMergeNode")
-		    .attr("in", "blur3")
+	// var feMerge = filter.append("feMerge");
+	// 	feMerge.attr("result", "result")
+	// 	feMerge.append("feMergeNode")
+	// 	    .attr("in", "blur")
+	// 	feMerge.append("feMergeNode")
+	// 	    .attr("in", "blur2")
+	// 	feMerge.append("feMergeNode")
+	// 	    .attr("in", "blur3")
 
-    filter.append("feComposite")
-    	.attr("operator","in")
-    	.attr("in", "inset-selection")
-    	.attr("in2", "blur")
-    	.attr("result", "inset-blur")
-   	filter.append("feComposite")
-    	.attr("operator","over")
-    	.attr("in", "original-no-fill")
-    	.attr("in2", "inset-blur")
+ //    filter.append("feComposite")
+ //    	.attr("operator","in")
+ //    	.attr("in", "inset-selection")
+ //    	.attr("in2", "blur")
+ //    	.attr("result", "inset-blur")
+ //   	filter.append("feComposite")
+ //    	.attr("operator","over")
+ //    	.attr("in", "original-no-fill")
+ //    	.attr("in2", "inset-blur")
 
 	var statePaths = svg.append("g");
 	statePaths.selectAll("path").data(states).enter()
 	.append("path").attr("d", path)
-	.style("fill", function (state) { return digitScale(state.Percent); })
-	.style("stroke", "#ccc");
+	.style("fill", function (state) { return digitScale(state.Percent); });
 		
 	d3.csv("Graph1Data.csv", function (error, rows) {
 		if (error) {console.log(error);}
-			
-		// what should we do with the CSV data?
 		stateAtlas = d3.map(rows, function (state) { 
 			return Number(state.Id); 
 		});
-
-		statePaths.selectAll("path")
-		.style("fill", function (state) {
-			var stateData = stateAtlas.get(state.id);
-			if (! stateData) {return "none";}
-			return percentScale(stateData.Percent);
-			});
 			
 		});
 
@@ -251,8 +228,7 @@
 
 	statePaths.selectAll("path").data(states).enter()
 	.append("path").attr("d", path)
-	.style("stroke", "#000")
-	.style("stroke-width",2);
+	.style("stroke-width",1.5);
 
 	
 	d3.csv("Graph1Data.csv", function (error, rows) {
@@ -263,15 +239,6 @@
 		});
 
 		statePaths.selectAll("path")
-		.style("stroke",
-			function (state) {
-				var stateData = stateAtlas.get(state.id);
-				if (! stateData) {return "none";}
-			// for (var x=0; x<49; x++){
-			// 	console.log("id " + stateData.Id+", name " +stateData.State+", percent "+stateData.Percent);
-			// }
-				return percentScale(stateData.Percent);
-			})
 		.style("fill",
 			function(state) {
 				var stateData = stateAtlas.get(state.id);
@@ -299,20 +266,6 @@
 				}
 				if(stateData.Percent>=13.1){
 					return "url(#inner-shadow)";
-				}else{
-					return "none";
-				}
-			})
-		.style("stroke",
-			function(state){
-				var stateData = stateAtlas.get(state.id);
-				if(!stateData){return "none";}
-				if(stateData.Percent<=7.6){
-					return "black";
-				}
-				if(stateData.Percent>=13.1){
-					// return "white";
-					return "black";
 				}else{
 					return "none";
 				}
