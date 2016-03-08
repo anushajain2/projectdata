@@ -111,6 +111,7 @@
 
 <div id="map">
 <script>
+///// Initialize Scales, Variables /////
 var mapWidth = 960,
 	    mapHeight = 600;
 	var projection = d3.geo.albersUsa();
@@ -127,7 +128,7 @@ var mapWidth = 960,
 	d3.json("us.json", function(error, shapes) {
 		states = topojson.feature(shapes, shapes.objects.states).features;
 	var defs = svg.append("defs");
-// Adapted from http://www.xanthir.com/b4Yv0; http://jsfiddle.net/kkPM4/
+// DropShadow Adapted from http://www.xanthir.com/b4Yv0; http://jsfiddle.net/kkPM4/
 	var filter = defs.append("filter")
 	    .attr("id", "drop-shadow")
 	    .attr("height", "200%")
@@ -164,22 +165,8 @@ var mapWidth = 960,
 	    .attr("dx", -2.5)
 	    .attr("dy", -3.5)
 	    .attr("result", "offsetBlur")
-	defs.append("linearGradient")
-		.attr("id","grad1")
-        .selectAll("stop")
-        .data([{offset: "0%", color: "#fff"},
-        {offset: "100%", color: "#edf8b1"}])
-        .enter().append("stop")
-        .attr("offset", function(d) { return d.offset; })
-        .attr("stop-color", function(d) { return d.color; });
-	defs.append("linearGradient")
-		.attr("id","grad2")
-        .selectAll("stop")
-        .data([{offset: "0%", color: "#edf8b1"},
-        {offset: "100%", color: "#ff0000"}])
-        .enter().append("stop")
-        .attr("offset", function(d) { return d.offset; })
-        .attr("stop-color", function(d) { return d.color; });
+
+///// Draw States ///// 
 	var statePaths = svg.append("g");
 	statePaths.selectAll("path").data(states).enter()
 	.append("path").attr("d", path)
@@ -191,10 +178,11 @@ var mapWidth = 960,
 			return Number(state.Id); 
 		});	
 	});
-	var statePaths = svg.append("g");
-	// var stateCircles = svg.append("g");
+
 	var stateTags = svg.append("g");
 	var mapLegend = svg.append("g");
+
+	///// Initialize State Tags /////
 	stateTags.selectAll("path").data(states).enter()
 	.append("text")
 	.attr("x",function(state){
@@ -222,13 +210,15 @@ var mapWidth = 960,
 	.attr("dominant-baseline","middle");
 	statePaths.selectAll("path").data(states).enter()
 	.append("path").attr("d", path);
-	
+
+	///// CSV Functions /////
 	d3.csv("Graph1Data.csv", function (error, rows) {
 	if (error) {console.log(error);}
 		
 		stateAtlas = d3.map(rows, function (state) { 
 			return Number(state.Id); 
 		});
+		///// Fill States with Coded Color /////
 		statePaths.selectAll("path")
 		.style("fill",
 			function(state) {
@@ -248,6 +238,7 @@ var mapWidth = 960,
 				return "botstate";
 			}
 		})
+		///// Apply Drop Shadow to Top/Bottom 5 States /////
 		.style("filter",
 			function(state){
 				var stateData = stateAtlas.get(state.id);
@@ -261,7 +252,7 @@ var mapWidth = 960,
 					return "none";
 				}
 			});
-		
+		///// Add State Names /////
 		stateTags.selectAll("text")
 		.text(function(text){
 			var stateData = stateAtlas.get(text.id)
