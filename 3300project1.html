@@ -1,36 +1,81 @@
 <html>
+<!-- Now look at health care workers -->
+
 <head>
 	<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+	<link href='https://fonts.googleapis.com/css?family=PT+Sans+Narrow' rel='stylesheet' type='text/css'>
 <!-- Load the d3 library. -->
 <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 <script src="http://d3js.org/topojson.v1.min.js"></script>
+<!-- Makes great legends -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/1.9.0/d3-legend.js"></script>
 
 <!-- Move to different file! -->
 <style>
-	.scxAxis, .scyAxis path {
+	.scxAxis path, .scyAxis path {
 		fill: none;
-		stroke: black;
+		/*stroke: black;*/
+		stroke: #d3d3d3;
 	}
-	.scxAxis, .scyAxis text {
+	.scxAxis text, .scyAxis text {
 		font-size: 8px;
 		font-family: "Open Sans";
+
+		stroke: #fff6e5; 
 	}
+
+
 	body {
-		font-family: "Open Sans";
+		font-family: "PT Sans Narrow";
+		background-color: #323232;
+	}
+
+	h1 {
+		color: #fff6e5;
 	}
 
 	.topstate{
-	  	stroke: red;
+	  	stroke: none;
 	}
 
-    .grid .tick {
+
+    .grid {
     	stroke: #d3d3d3;
-    	opacity: 0.001;
+    	opacity: 0.7;
 	}	
 
 	.grid path {
 		stroke-width: 0;
 	}
+
+	.label {
+		font-size: 12px;
+	}
+
+	.legendLinear text.label {
+		font-size: 10px;
+	}
+
+	.line {
+		fill: none;
+		stroke: #3f3f3f;
+		/*stroke: #fff;*/
+		stroke-width: 1.5px;
+		opacity: .3;
+	}
+
+	circle.swatch {
+		fill: #3f3f3f;
+	}
+
+	.axisLabel {
+		font-size: 10px;
+	}
+
+	#scatter {
+		margin: 0 auto;
+	}
+
 
 
 </style>
@@ -39,7 +84,9 @@
 </head>
 
 <body>
+<h1>Mental Health in the US</h1>
 
+<h3>Distribution of Mental Health Cases in the US</h3>
 <div id="map"></div>
 <defs>
 	<linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -48,136 +95,90 @@
     </linearGradient>
 </defs>
 
+<h3>Mental Health Cases Correlated to Relative Income and Veteran Population</h3>
 <div id="scatter"></div>
 
+
+<div id="scatter2"></div>
+<h3>Mental Health Cases Correlated to Density of Mental Health Workers</h3>
+
+<p>Mental Health Counselors, Child Family and School Social Workers, Healthcare Social Workers, Mental Health and Substance Abuse Social Workers, Social Workers All Other, Psychiatrists, Clinical Counseling and School Psychologists, and Psychologists (All Other)</p>
+
+<!-- /////////////////////////
+			US MAP
+//////////////////////////////-->
+
+<div id="map">
 <script>
-	/************ US Map ************/ 
-
-	var mapWidth = 960,
+var mapWidth = 960,
 	    mapHeight = 600;
-
 	var projection = d3.geo.albersUsa();
-
 	var path = d3.geo.path().projection(projection);
 		
 	var svg = d3.select("#map").append("svg")
 	    .attr("width", mapWidth)
 	    .attr("height", mapHeight);
-
 	var digitScale = d3.scale.category10()
-	var percentScale = d3.scale.linear().domain([1, 9, 15]).range(["#fff", "#edf8b1", "#ff0000"]);
+	var percentScale = d3.scale.linear().domain([1, 9, 15]).range(["#EDE3DE", "#edf8b1", "#ff0000"]);
 	var popScale = d3.scale.linear().domain([500000,40000000]).range([15,35]);
-
 	var states;
-
 	var stateAtlas;
-
 	d3.json("us.json", function(error, shapes) {
 		states = topojson.feature(shapes, shapes.objects.states).features;
-
 	var defs = svg.append("defs");
-
-
 // Adapted from http://www.xanthir.com/b4Yv0; http://jsfiddle.net/kkPM4/
 	var filter = defs.append("filter")
-	    .attr("id", "inner-shadow")
+	    .attr("id", "drop-shadow")
 	    .attr("height", "200%")
 	    .attr("width", "200%")
 	    .attr("x", "-50%")
 	    .attr("y", "-50%")
-
 	filter.append("feCompenentTransfer")
 		.attr("in", "SourceAlpha")
 		.append("feFuncA")
 			.attr("type", "table")
 			.attr("tableValues", "1 0")
 	filter.append("feGaussianBlur")
-	    .attr("stdDeviation", 0.5)
-
+	    .attr("stdDeviation", 2)
 	filter.append("feOffset")
-	    .attr("dx", -4)
-	    .attr("dy", -4)
+	    .attr("dx", 1)
+	    .attr("dy", 1)
 	    .attr("result", "offsetBlur")
-
-    // filter.append("feFlood")
-    // 	.attr("flood-color", "rgb(20,0,0)")
-    // 	.attr("result", "color")
-
- //    filter.append("feComposite")
- //    	.attr("in", "offsetblur")
- //    	.attr("operator","in")
- //    filter.append("feComposite")
- //    	.attr("in", "SourceAlpha")
- //    	.attr("operator","in")
-
- //    // filter.append("feMerge");
-
-	// var feMerge = filter.append("feMerge");
-	// 	feMerge.append("feMergeNode")
-	// 	    .attr("in", "offsetBlur")
-	// 	feMerge.append("feMergeNode")
-	// 	    .attr("in", "SourceGraphic");
-
-// ---------insetshadow----------
-	// var filter = defs.append("filter")
-	//     .attr("id", "inset-shadow")
-	//     // .attr("height", "200%")
-	//     // .attr("width", "200%")
-	//     // .attr("x", "-50%")
-	//     // .attr("y", "-50%")
-
-	// filter.append("feCompenentTransfer")
-	// 	.attr("in", "SourceAlpha")
-	// 	.attr("result", "inset-selection")
-	// 	.append("feFuncA")
-	// 		.attr("type", "discrete")
-	// 		.attr("tableValues", "0 1 1 1 1 1")
-	// filter.append("feCompenentTransfer")
-	// 	.attr("in", "SourceAlpha")
-	// 	.attr("result", "original-no-fill")
-	// 	.append("feFuncA")
-	// 		.attr("type", "discrete")
-	// 		.attr("tableValues", "0 0 1")
-	// filter.append("feColorMatrix")
-	// 	.attr("type", "matrix")
-	// 	.attr("in", "original-no-fill")
-	// 	.attr("result", "new-source-alpha")
-	// 	.attr("values", "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0")
-
-	// filter.append("feGaussianBlur")
-	//     .attr("in", "SourceAlpha")
-	//     .attr("result", "blur")
-	//     .attr("stdDeviation", "5")
-	// filter.append("feGaussianBlur")
-	//     .attr("in", "SourceAlpha")
-	//     .attr("result", "blur2")
-	//     .attr("stdDeviation", "10")
-	// filter.append("feGaussianBlur")
-	//     .attr("in", "SourceAlpha")
-	//     .attr("result", "blur3")
-	//     .attr("stdDeviation", "15")
-
- //    filter.append("feMerge")
-
-	// var feMerge = filter.append("feMerge");
-	// 	feMerge.attr("result", "result")
-	// 	feMerge.append("feMergeNode")
-	// 	    .attr("in", "blur")
-	// 	feMerge.append("feMergeNode")
-	// 	    .attr("in", "blur2")
-	// 	feMerge.append("feMergeNode")
-	// 	    .attr("in", "blur3")
-
- //    filter.append("feComposite")
- //    	.attr("operator","in")
- //    	.attr("in", "inset-selection")
- //    	.attr("in2", "blur")
- //    	.attr("result", "inset-blur")
- //   	filter.append("feComposite")
- //    	.attr("operator","over")
- //    	.attr("in", "original-no-fill")
- //    	.attr("in2", "inset-blur")
-
+    filter.append("feFlood")
+    	.attr("flood-color", "black")
+    	.attr("result", "color")
+    filter.append("feComposite")
+    	.attr("in", "offsetblur")
+    	.attr("operator","in")
+    filter.append("feComposite")
+    	.attr("in", "SourceAlpha")
+    	.attr("operator","in")
+    filter.append("feMerge");
+	var feMerge = filter.append("feMerge");
+		feMerge.append("feMergeNode")
+		    .attr("in", "offsetBlur")
+		feMerge.append("feMergeNode")
+		    .attr("in", "SourceGraphic");
+	filter.append("feOffset")
+	    .attr("dx", -2.5)
+	    .attr("dy", -3.5)
+	    .attr("result", "offsetBlur")
+	defs.append("linearGradient")
+		.attr("id","grad1")
+        .selectAll("stop")
+        .data([{offset: "0%", color: "#fff"},
+        {offset: "100%", color: "#edf8b1"}])
+        .enter().append("stop")
+        .attr("offset", function(d) { return d.offset; })
+        .attr("stop-color", function(d) { return d.color; });
+	defs.append("linearGradient")
+		.attr("id","grad2")
+        .selectAll("stop")
+        .data([{offset: "0%", color: "#edf8b1"},
+        {offset: "100%", color: "#ff0000"}])
+        .enter().append("stop")
+        .attr("offset", function(d) { return d.offset; })
+        .attr("stop-color", function(d) { return d.color; });
 	var statePaths = svg.append("g");
 	statePaths.selectAll("path").data(states).enter()
 	.append("path").attr("d", path)
@@ -187,49 +188,39 @@
 		if (error) {console.log(error);}
 		stateAtlas = d3.map(rows, function (state) { 
 			return Number(state.Id); 
-		});
-			
-		});
-
+		});	
+	});
 	var statePaths = svg.append("g");
 	// var stateCircles = svg.append("g");
 	var stateTags = svg.append("g");
-
-	// stateCircles.selectAll("path").data(states).enter()
-	// .append("circle")
-	// .attr("cx",function(state){
-	// 	return path.centroid(state)[0]
-	// 	})
-	// .attr("cy",function(state){
-	// 	return path.centroid(state)[1]
-	// 	})
-	// .attr("id",function(state){
-	// 	return state.id;
-	// 	})
-	// .attr("stroke","black")
-	// .attr("stroke-width","0.25px")
-	// .attr("opacity",0.8);
-
+	var mapLegend = svg.append("g");
 	stateTags.selectAll("path").data(states).enter()
 	.append("text")
 	.attr("x",function(state){
-		return (path.centroid(state)[0])
-		})
+		if(state.id==78||state.id==72){
+			return 0;
+		}
+		if(state.id==12 || state.id==15 || state.id==26){ 
+			return path.centroid(state)[0]+10;
+		}else{
+			return (path.centroid(state)[0])
+		}})
 	.attr("y",function(state){
-		if(state.id=="11"){ return path.centroid(state)[1]+5;}
-		else{return path.centroid(state)[1]}
-		})
+		if(state.id==78||state.id==72){
+			return 0;
+		}
+		if(state.id=="11" || state.id==12 || state.id==15){ return path.centroid(state)[1]+5;
+		}else{
+			return path.centroid(state)[1]
+		}})
 	.attr("font-size","10px")
 	.attr("id",function(state){
 		return state.id;
 		})
 	.attr("text-anchor","middle")
 	.attr("dominant-baseline","middle");
-
 	statePaths.selectAll("path").data(states).enter()
-	.append("path").attr("d", path)
-	.style("stroke-width",1.5);
-
+	.append("path").attr("d", path);
 	
 	d3.csv("Graph1Data.csv", function (error, rows) {
 	if (error) {console.log(error);}
@@ -237,7 +228,6 @@
 		stateAtlas = d3.map(rows, function (state) { 
 			return Number(state.Id); 
 		});
-
 		statePaths.selectAll("path")
 		.style("fill",
 			function(state) {
@@ -262,188 +252,450 @@
 				var stateData = stateAtlas.get(state.id);
 				if(!stateData){return "none";}
 				if(stateData.Percent<=7.6){
-					return "url(#inner-shadow)";
+					return "url(#drop-shadow)";
 				}
 				if(stateData.Percent>=13.1){
-					return "url(#inner-shadow)";
+					return "url(#drop-shadow)";
 				}else{
 					return "none";
 				}
 			});
-
-		// stateCircles.selectAll("circle")
-		// .style("fill",
-		//  	function(circle){
-		// 		var stateData = stateAtlas.get(circle.id)
-		// 		if (! stateData) {return "none";}
-		// 		return percentScale(stateData.Percent);
-		//  	})
-		// .style("r",
-		// 	function(circle){
-		// 		var stateData = stateAtlas.get(circle.id)
-		// 		if (! stateData) {return "none";}
-		// 		return popScale(stateData.Population);
-		// 	});
 		
 		stateTags.selectAll("text")
 		.text(function(text){
 			var stateData = stateAtlas.get(text.id)
-			if (!stateData) {return "none";}
+			if (!stateData) {return null;}
 			return stateData.Tag;
 		})
 		.attr("font-weight","bold");
+
+
+		///// Drawing Legend /////
+		var maplegend = svg.append("g")
+			.attr("transform", "translate(55,0)");
+		maplegend.append("g")
+				  .attr("class", "legendLinear")
+				  .attr("transform", "translate(550,30)");
+			var maplegendLinear = d3.legend.color()
+				  .shapeWidth(30)
+				  .orient('horizontal')
+				  .scale(percentScale);
+
+				maplegend.select(".legendLinear")
+				  .call(maplegendLinear);
+
+				maplegend.append("text")
+					.attr("class", "keyLabel")
+					.attr("x", 550)
+					.attr("y", 20)
+					.text("Percentage Affected by Severe Mental Health")
+					.attr("font-size", "10px");
 	});
-		
 });
-
-
-	// Problem: ticks are too far to right
-	/************ Scatter Plot ************/ 
-	var scMargin = {top: 20, right: 20, bottom: 30, left: 40}
-	var scatterWidth = 800 - scMargin.left - scMargin.right
-	var scatterHeight = 400 - scMargin.top - scMargin.bottom
-
-	var scatterxVal = function(d) { return d.Percent; },
-		scatterxScale = d3.scale.linear().range([0, scatterWidth]),
-		scatterxMap = function(d) { return scatterxScale(scatterxVal(d)); },
-		scatterxAxis = d3.svg.axis().scale(scatterxScale).orient("bottom");
-
-	var scatteryVal = function(d) { return d.Income; },
-		scatteryScale = d3.scale.linear().range([scatterHeight,0]),
-		scatteryMap = function(d) { return scatteryScale(scatteryVal(d)); },
-		scatteryAxis = d3.svg.axis()
-						.scale(scatteryScale).orient("left")
-						.ticks(10);
-
-
-	var scattersvg = d3.select("body").append("svg")
-		.attr("width", scatterWidth	+ scMargin.left + scMargin.right )
-		.attr("height", scatterHeight + scMargin.top + scMargin.bottom )
-		.append ("g")
-			.attr("transform", "translate(" + scMargin.left + "," + scMargin.top + ")");
-
-	// Fill Color
-	var scatterCVal = function(d) { return d.Id; };
-	var color = d3.scale.category20c();
-
-
-	d3.csv("Graph1Data.csv", function (error, rows) {
-		if (error) {console.log(error);}
-		rows.forEach(function(d) {
-			d.Income = +d.Income;
-			d.Percent = +d.Percent;
-		});
-
-		scatterxScale.domain([d3.min(rows, scatterxVal)-1, d3.max(rows, scatterxVal)+1]);
-		scatteryScale.domain([d3.min(rows, scatteryVal)-1, d3.max(rows, scatteryVal)+1]);
-
-		// scattersvg.selectAll(".dot")
-		// 	.data(rows)
-		// 	 .enter().append("circle")
-		// 	 .attr("class", "dot")
-		// 	 .attr("r", function (d) {
-		// 	 	return (d.pVeterans)
-		// 	 })
-		// 	 .attr("cx", scatterxMap)
-		// 	 .attr("cy", scatteryMap)
-		// 	 // .style("fill", function(d) {
-		// 	 // 	return color(scatterCVal(d)%20);
-		// 	 // });
-		// 	.style("fill", function(d) {
-		// 		return percentScale(d.Percent)
-		// 	});
-
-		// scattersvg.selectAll("text")
-		// 	.data(rows)
-		// 	.enter()
-		// 	.append("text")
-		// 	.text(function(d) {
-		// 		return d.Tag;
-		// 	})
-		// 	.attr("x", function(d) {
-		// 		return scatterxMap(d);
-		// 	})
-		// 	.attr("y", function(d) {
-		// 		return scatteryMap(d);
-		// 	})
-		// 	.attr("font-size", "8px");
-
-		// Creating x,y axis
-		 scattersvg.append("g") 
-		 	.attr("class", "scxAxis")
-		 	.attr("transform", "translate(0," + scatterHeight + ")")
-		 	.call(scatterxAxis);
-		 scattersvg.append("g")
-		 	.attr("class", "scyAxis")
-		 	.call(scatteryAxis);
-
-
-		// Creating grid lines
-		var numTicks = 10
-
-		var yAxisGrid = scatteryAxis.ticks(numTicks)
-			.tickSize(scatterWidth, 0)
-			.tickFormat("")
-			.orient("right");
-		var xAxisGrid = scatterxAxis.ticks(numTicks)
-			.tickSize(-scatterHeight, 0)
-			.tickFormat("")
-			.orient("top");
-		scattersvg.append("g")
-			.attr("class", "grid")
-			.call(yAxisGrid)
-		scattersvg.append("g")
-			.attr("class", "grid")
-			.call(xAxisGrid)
-
-
-		scattersvg.selectAll(".dot")
-			.data(rows)
-			 .enter().append("circle")
-			 .attr("class", "dot")
-			 .attr("r", function (d) {
-			 	return (d.pVeterans)
-			 })
-			 .attr("cx", scatterxMap)
-			 .attr("cy", scatteryMap)
-			 // .style("fill", function(d) {
-			 // 	return color(scatterCVal(d)%20);
-			 // });
-			.style("fill", function(d) {
-				return percentScale(d.Percent)
-			});
-console.log(rows);
-		scattersvg.selectAll("text")
-			.data(rows)
-			.enter()
-			.append("text")
-			.text(function(d) {
-				console.log(d.Tag);
-				return d.Tag;
-			})
-			.attr("x", function(d) {
-				return scatterxMap(d);
-			})
-			.attr("y", function(d) {
-				return scatteryMap(d);
-			})
-			.attr("font-size", "8px")
-console.log(rows);
-	});
-	function makeXGrid() {
-		console.log("xcalled")
-		return d3.svg.axis()
-			.scale(scatterxVal)
-			.orient("bottom")
-			.ticks(10)
-	}
-	function makeYGrid() {
-		console.log("ycalled")
-		return d3.svg.axis()
-			.scale(scatteryVal)
-			.orient("left")
-			.ticks(10)
-	}
 </script>
+</div>
+
+<!-- /////////////////////////
+		SCATTER PLOT 1
+//////////////////////////////-->
+
+<div id="scatter1">
+	<script>
+
+		///// Defining Dimensions /////
+
+		var scMargin = {top: 20, right: 20, bottom: 30, left: 40}
+		var scatterWidth = 850 - scMargin.left - scMargin.right
+		var scatterHeight = 400 - scMargin.top - scMargin.bottom
+
+		///// Defining Scales /////
+
+		var scatterxVal = function(d) { return d.Percent; },
+			scatterxScale = d3.scale.linear().range([0, scatterWidth]),
+			scatterxMap = function(d) { return scatterxScale(scatterxVal(d)); },
+			scatterxAxis = d3.svg.axis().scale(scatterxScale).orient("bottom");
+
+		var scatteryVal = function(d) { return d.Income; },
+			scatteryScale = d3.scale.linear().range([scatterHeight,0]),
+			scatteryMap = function(d) { return scatteryScale(scatteryVal(d)); },
+			scatteryAxis = d3.svg.axis()
+							.scale(scatteryScale).orient("left")
+		var	radiusScale = d3.scale.linear().domain([5, 10]).range([3,18]);
+		var percentScale = d3.scale.linear().domain([1, 9, 15]).range(["#EDE3DE", "#edf8b1", "#ff3232"]);
+
+		///// Creating SVG /////
+
+		var scattersvg = d3.select("body").append("svg")
+			.attr("width", scatterWidth	+ scMargin.left + scMargin.right )
+			.attr("height", scatterHeight + scMargin.top + scMargin.bottom )
+			.append ("g")
+				.attr("transform", "translate(" + scMargin.left + "," + scMargin.top + ")");
+
+		var gscatter = scattersvg.append("g")
+			.attr("transform", "translate(100,0) scale(.8)");
+
+		///// Formatting Data /////
+
+		d3.csv("scatter1.csv", function (error, rows) {
+			if (error) {console.log(error);}
+			rows.forEach(function(d) {
+				d.Income = +d.Income;
+				d.Percent = +d.Percent;
+			});
+
+			///// Formating Scales /////
+
+			scatterxScale.domain([d3.min(rows, scatterxVal)-1, d3.max(rows, scatterxVal)+1]);
+			scatteryScale.domain([d3.min(rows, scatteryVal)-400, d3.max(rows, scatteryVal)+1000]);
+
+			///// Creating X,Y Axis /////
+
+			 gscatter.append("g") 
+			 	.attr("class", "scxAxis")
+			 	.attr("transform", "translate(0," + scatterHeight + ")")
+			 	.call(scatterxAxis);
+			 gscatter.append("g")
+			 	.attr("class", "scyAxis")
+			 	.call(scatteryAxis);
+
+
+			///// Creating Grid Lines /////
+			var numTicks = 10
+
+			var yAxisGrid = scatteryAxis.ticks(numTicks)
+				.tickSize(scatterWidth, 0)
+				.tickFormat("")
+				.orient("right");
+			var xAxisGrid = scatterxAxis.ticks(numTicks)
+				.tickSize(-scatterHeight, 0)
+				.tickFormat("")
+				.orient("top");
+			gscatter.append("g")
+				.attr("class", "grid")
+				.call(yAxisGrid)
+			gscatter.append("g")
+				.attr("class", "grid")
+				.call(xAxisGrid)
+
+			/*  /////////////////////////////////
+				Generate Line of Best Fit
+			///////////////////////////////// */
+
+			///// Filling Points Array /////
+
+			var bestfit = [],
+				c = 86010,
+				d = -.33;
+			for (var k = 5.6; k < 16.6; k++) {
+				bestfit.push( {x: k, y: c * Math.pow(k, d)});
+			};
+
+			///// Create Line /////
+
+			var sline = d3.svg.line()
+				.x(function(d) {
+					return scatterxScale(d.x);})
+				.y(function(d) {return scatteryScale(d.y);})
+			gscatter.append("path")
+	      		.datum(bestfit)
+	      		.attr("class", "line")
+	      		.attr("d", sline);
+
+			///// Drawing Dots /////
+
+			gscatter.append("g")
+				.selectAll(".dot")
+				.data(rows)
+				 .enter().append("circle")
+				 .attr("class", "dot")
+				 .attr("cx", scatterxMap)
+				 .attr("cy", scatteryMap)
+				 .attr("r", function (d) {
+				 	return (radiusScale(parseInt(d.pVeterans)));
+				 })
+				.style("fill", function(d) {
+					return percentScale(d.Percent)
+				})
+
+			///// Appending State Abbreviations /////
+
+			gscatter.append("g")
+				.selectAll("text")
+				.data(rows)
+				.enter()
+				.append("text")
+				.text(function(d) {
+					return d.Tag;
+				})
+				.attr("x", function(d) {
+					return scatterxMap(d) - 5;
+				})
+				.attr("y", function(d) {
+					return scatteryMap(d) + 3;
+				})
+				.attr("font-size", "8px")
+
+
+				///// Draw Legend /////
+
+				var legend = gscatter.append("g")
+					.attr("transform", "translate(15,0)");
+
+				legend.append('rect')
+					.attr("class", "keyBox")
+					.attr("x", 530)
+					.attr("y", 0)
+					.attr("width", 300)
+					.attr("height", 150)
+					.attr("fill", "white");
+
+				legend.append("g")
+				  .attr("class", "legendSize")
+				  .attr("transform", "translate(550, 40) scale(.8)");
+
+				var legendSize = d3.legend.size()
+				  .scale(radiusScale)
+				  .shape('circle')
+				  .shapePadding(15)
+				  .labelOffset(20)
+				  .orient('horizontal');
+
+				legend.select(".legendSize")
+				  .call(legendSize);
+
+				legend.append("text")
+					.attr("class", "keyLabel")
+					.attr("x", 550)
+					.attr("y", 20)
+					.text("Percentage of Veterans")
+					.attr("font-size", "10px");
+
+				legend.append("g")
+				  .attr("class", "legendLinear")
+				  .attr("transform", "translate(550,100)");
+
+				var legendLinear = d3.legend.color()
+				  .shapeWidth(30)
+				  .orient('horizontal')
+				  .scale(percentScale);
+
+				legend.select(".legendLinear")
+				  .call(legendLinear);
+
+				legend.append("text")
+					.attr("class", "keyLabel")
+					.attr("x", 550)
+					.attr("y", 90)
+					.text("Percentage Affected by Severe Mental Health")
+					.attr("font-size", "10px");
+
+			///// Append Axis Labels /////
+
+			var yaxisLab = gscatter.append("g")
+				.attr("transform", "translate(0,40)");
+
+			gscatter.append("text")
+				.attr("class", "axisLabel")
+		        .attr("x", scatterWidth2 / 2 - 200)
+		        .attr("y",  scatterHeight2 + scMargin2.bottom + 10)
+		        .text("Percentage With 14 or More Mentally Unhealthy Days (Frequent Mental Distress)")
+		    yaxisLab.append("text")
+				.attr("class", "axisLabel")
+		        .attr("x", 0 - scatterHeight2 / 2)
+		        .attr("y",  0 - scMargin2.left)
+		        .attr("transform", "rotate(-90)")
+		        .text("Relative Income")
+		});
+	</script>
+</div>
+
+<!-- /////////////////////////
+		SCATTER PLOT 2 
+//////////////////////////////-->
+
+<div id="scatter2">
+	<script>
+		///// Defining Dimensions /////
+
+		var scMargin2 = {top: 20, right: 20, bottom: 30, left: 40}
+		var scatterWidth2 = 850 - scMargin2.left - scMargin2.right
+		var scatterHeight2 = 400 - scMargin2.top - scMargin2.bottom
+
+		///// Defining Scales /////
+
+		var scatterxVal2 = function(d) { return d.Percent; },
+			scatterxScale2 = d3.scale.linear().range([0, scatterWidth2]),
+			scatterxMap2 = function(d) { return scatterxScale2(scatterxVal2(d)); },
+			scatterxAxis2 = d3.svg.axis().scale(scatterxScale2).orient("bottom");
+
+		var scatteryVal2 = function(d) { 
+			return d.Doctor_Density; },
+			scatteryScale2 = d3.scale.linear().range([scatterHeight2,0]),
+			scatteryMap2 = function(d) { return scatteryScale2(scatteryVal2(d)); },
+			scatteryAxis2 = d3.svg.axis()
+							.scale(scatteryScale2).orient("left");
+
+		///// Creating SVG /////
+
+		var scattersvg2 = d3.select("body").append("svg")
+			.attr("width", scatterWidth2	+ scMargin2.left + scMargin2.right )
+			.attr("height", scatterHeight2 + scMargin2.top + scMargin2.bottom )
+			.append ("g")
+				.attr("transform", "translate(" + scMargin2.left + "," + scMargin2.top + ")");
+
+		var gscatter2 = scattersvg2.append("g")
+			.attr("transform", "translate(100,0) scale(.8)");
+
+		///// Formatting Data /////
+
+		d3.csv("scatterplot2.csv", function (error, rows) {
+			if (error) {console.log(error);}
+			rows.forEach(function(d) {
+				d.Percent = +d.Percent;
+				d.Doctor_Density = +d.Doctor_Density;
+			});
+
+			///// Formating Scales /////
+
+			scatterxScale2.domain([d3.min(rows, scatterxVal2)-.3, d3.max(rows, scatterxVal2)+.3]);
+			scatteryScale2.domain([d3.min(rows, scatteryVal2)-.0005, d3.max(rows, scatteryVal2)+.0005]);
+
+			///// Creating X,Y Axis /////
+
+			 gscatter2.append("g") 
+			 	.attr("class", "scxAxis")
+			 	.attr("transform", "translate(0," + scatterHeight2 + ")")
+			 	.call(scatterxAxis2);
+			 gscatter2.append("g")
+			 	.attr("class", "scyAxis")
+			 	.call(scatteryAxis2);
+
+
+			///// Creating Grid Lines /////
+
+			var numTicks2 = 10
+
+			var yAxisGrid = scatteryAxis2.ticks(numTicks2)
+				.tickSize(scatterWidth2, 0)
+				.tickFormat("")
+				.orient("right");
+			var xAxisGrid = scatterxAxis2.ticks(numTicks2)
+				.tickSize(-scatterHeight2, 0)
+				.tickFormat("")
+				.orient("top");
+			gscatter2.append("g")
+				.attr("class", "grid")
+				.call(yAxisGrid)
+			gscatter2.append("g")
+				.attr("class", "grid")
+				.call(xAxisGrid)
+
+			/*  /////////////////////////////////
+				Generate Line of Best Fit
+			///////////////////////////////// */
+
+			///// Filling Points Array /////
+
+			var bestfit2 = [],
+				a = .0056,
+				b = -.062;
+			for (var k = 6.30; k < 15.35; k++) {
+				bestfit2.push( {x: k, y: a * Math.pow(Math.E, b*k)});
+			};
+
+			///// Create Line /////
+
+			var line = d3.svg.line()
+				.x(function(d) {
+					return scatterxScale2(d.x);})
+				.y(function(d) {return scatteryScale2(d.y);})
+			gscatter2.append("path")
+	      		.datum(bestfit2)
+	      		.attr("class", "line")
+	      		.attr("d", line);
+
+
+			///// Drawing Dots /////
+
+			gscatter2.append("g")
+				.selectAll(".dot")
+				.data(rows)
+				 .enter().append("circle")
+				 .attr("class", "dot")
+				 .attr("cx", scatterxMap2)
+				 .attr("cy", scatteryMap2)
+				 .attr("r", 9)
+				.style("fill", function(d) {
+					return percentScale(d.Percent);
+				})
+
+			///// Appending State Abbreviations /////
+
+			gscatter2.append("g")
+				.selectAll("text")
+				.data(rows)
+				.enter()
+				.append("text")
+				.text(function(d) {
+					return d.Abbr;
+				})
+				.attr("x", function(d) {
+					return scatterxMap2(d) - 5;
+				})
+				.attr("y", function(d) {
+					return scatteryMap2(d) + 3;
+				})
+				.attr("font-size", "8px")
+
+			///// Drawing Legend /////
+			var legend2 = gscatter2.append("g")
+					.attr("transform", "translate(15,0)");
+			legend2.append('rect')
+					.attr("class", "keyBox")
+					.attr("x", 530)
+					.attr("y", 0)
+					.attr("width", 300)
+					.attr("height", 80)
+					.attr("fill", "white");
+
+			legend2.append("g")
+				  .attr("class", "legendLinear")
+				  .attr("transform", "translate(550,30)");
+			var legendLinear = d3.legend.color()
+				  .shapeWidth(30)
+				  .orient('horizontal')
+				  .scale(percentScale);
+
+				legend2.select(".legendLinear")
+				  .call(legendLinear);
+
+				legend2.append("text")
+					.attr("class", "keyLabel")
+					.attr("x", 550)
+					.attr("y", 20)
+					.text("Percentage Affected by Severe Mental Health")
+					.attr("font-size", "10px");
+
+			///// Append Axis Labels /////
+
+			var yaxisLab2 = gscatter2.append("g")
+				.attr("transform", "translate(0,70)");
+
+			gscatter2.append("text")
+				.attr("class", "axisLabel")
+		        .attr("x", scatterWidth2 / 2 - 200)
+		        .attr("y",  scatterHeight2 + scMargin2.bottom + 10)
+		        .text("Percentage With 14 or More Mentally Unhealthy Days (Frequent Mental Distress)")
+		    yaxisLab2.append("text")
+				.attr("class", "axisLabel")
+		        .attr("x", 0 - scatterHeight2 / 2)
+		        .attr("y",  0 - scMargin2.left)
+		        .attr("transform", "rotate(-90)")
+		        .text("Density of Mental Health Support")
+
+
+		});
+	</script>
+</div>
 </body>
 </html>
