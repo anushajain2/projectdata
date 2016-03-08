@@ -4,35 +4,37 @@
 <head>
 	<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
 	<link href='https://fonts.googleapis.com/css?family=PT+Sans+Narrow' rel='stylesheet' type='text/css'>
+	<link href='https://fonts.googleapis.com/css?family=Raleway:300' rel='stylesheet' type='text/css'>
+	<link href='https://fonts.googleapis.com/css?family=Roboto:400,100' rel='stylesheet' type='text/css'>
 <!-- Load the d3 library. -->
 <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 <script src="http://d3js.org/topojson.v1.min.js"></script>
 <!-- Makes great legends -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/1.9.0/d3-legend.js"></script>
 
-<!-- Move to different file! -->
 <style>
+
+	body {
+		font-family: 'PT Sans Narrow';
+		background-color: #181818;
+		color: #e5e5e5;
+		padding: 10px 30px;
+	}
+
+	/*********************
+			AXES
+	*********************/
+
 	.scxAxis path, .scyAxis path {
 		fill: none;
 		/*stroke: black;*/
 		stroke: #e5e5e5;
 	}
 	.scxAxis text, .scyAxis text {
-		font-size: 8px;
-		font-family: "Open Sans";
-
-		stroke: #e5e5e5; 
-	}
-
-
-	body {
-		/*font-family: "Open Sans";*/
-		font-family: 'PT Sans Narrow';
-		background-color: #181818;
-	}
-
-	h1 {
-		color: #e5e5e5;
+		font-size: 10px;
+		font-family: "PT Sans Narrow";
+		font-weight: lighter;
+		fill: #e5e5e5; 
 	}
 
 	.topstate{
@@ -40,13 +42,32 @@
 	}
 
 
-    .grid {
+	/*********************
+	  SCATTER PLOT GRID
+	*********************/
+
+	.grid {
     	stroke: #d3d3d3;
     	opacity: 0.7;
 	}	
 
 	.grid path {
 		stroke-width: 0;
+	}
+
+	/*********************
+	  		LEGEND
+	*********************/
+
+	circle.swatch {
+		fill: #cccccc;
+	}
+
+	text.keyLabel, text.label {
+		font-size: 12px;
+		fill: #e5e5e5;
+		font-family: "PT Sans Narrow";
+		font-weight: lighter;
 	}
 
 	.label {
@@ -57,24 +78,55 @@
 		font-size: 10px;
 	}
 
-	.line {
+	/*********************
+		SCATTER STYLING
+	*********************/
+
+	path.line {
 		fill: none;
-		stroke: #3f3f3f;
+		stroke: #f2f2f2;
 		/*stroke: #fff;*/
 		stroke-width: 1.5px;
-		opacity: .3;
-	}
-
-	circle.swatch {
-		fill: #3f3f3f;
+		opacity: .9;
 	}
 
 	.axisLabel {
-		font-size: 10px;
+		font-size: 15px;
+		fill: #e5e5e5;
+		font-family: "PT Sans Narrow";
 	}
 
-	#scatter {
+	#scatter1 {
 		margin: 0 auto;
+	}
+
+	/*********************
+			GENERAL
+	*********************/
+
+	svg {
+		padding-bottom: 50px;
+		padding-top: 30px;
+	}
+
+	/*********************
+		TEXT HEADINGS
+	*********************/
+
+	#mapHead {
+		font-size: 30px;
+		font-weight: bold;
+		margin: 0;
+	}
+
+	h1 {
+		font-size: 50px;
+		color: #e5e5e5;
+		padding: 20 0;
+	}
+
+	h3 {
+		font-size: 30px;
 	}
 
 
@@ -85,9 +137,13 @@
 </head>
 
 <body>
-<h1>Mental Health in the US</h1>
+<h1>Mental Health at a Glance</h1>
 
-<h3>Distribution of Mental Health Cases in the US</h3>
+<p id="mapHead">Distribution of Mental Health Cases in the US</p>
+<p id="mapDescrip">
+	This map shows the percentage of Americans who experience 14 or more mentally unhealthy days (Frequent Mental Distress) in 2014.
+</p>
+
 <div id="map"></div>
 <defs>
 	<linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -96,28 +152,20 @@
     </linearGradient>
 </defs>
 
-<h3>Mental Health Cases Correlated to Relative Income and Veteran Population</h3>
-<div id="scatter"></div>
-
-
-<div id="scatter2"></div>
-<h3>Mental Health Cases Correlated to Density of Mental Health Workers</h3>
-
-<p>Mental Health Counselors, Child Family and School Social Workers, Healthcare Social Workers, Mental Health and Substance Abuse Social Workers, Social Workers All Other, Psychiatrists, Clinical Counseling and School Psychologists, and Psychologists (All Other)</p>
-
 <!-- /////////////////////////
 			US MAP
 //////////////////////////////-->
 
 <div id="map">
 <script>
+///// Initialize Scales, Variables /////
 var mapWidth = 960,
 	    mapHeight = 600;
 	var projection = d3.geo.albersUsa();
 	var path = d3.geo.path().projection(projection);
 		
 	var svg = d3.select("#map").append("svg")
-	    .attr("width", mapWidth)
+	    .attr("width", mapWidth + 130)
 	    .attr("height", mapHeight);
 	var digitScale = d3.scale.category10()
 	var percentScale = d3.scale.linear().domain([1, 9, 15]).range(["#EDE3DE", "#edf8b1", "#ff0000"]);
@@ -127,7 +175,7 @@ var mapWidth = 960,
 	d3.json("us.json", function(error, shapes) {
 		states = topojson.feature(shapes, shapes.objects.states).features;
 	var defs = svg.append("defs");
-// Adapted from http://www.xanthir.com/b4Yv0; http://jsfiddle.net/kkPM4/
+// DropShadow Adapted from http://www.xanthir.com/b4Yv0; http://jsfiddle.net/kkPM4/
 	var filter = defs.append("filter")
 	    .attr("id", "drop-shadow")
 	    .attr("height", "200%")
@@ -164,23 +212,12 @@ var mapWidth = 960,
 	    .attr("dx", -2.5)
 	    .attr("dy", -3.5)
 	    .attr("result", "offsetBlur")
-	defs.append("linearGradient")
-		.attr("id","grad1")
-        .selectAll("stop")
-        .data([{offset: "0%", color: "#fff"},
-        {offset: "100%", color: "#edf8b1"}])
-        .enter().append("stop")
-        .attr("offset", function(d) { return d.offset; })
-        .attr("stop-color", function(d) { return d.color; });
-	defs.append("linearGradient")
-		.attr("id","grad2")
-        .selectAll("stop")
-        .data([{offset: "0%", color: "#edf8b1"},
-        {offset: "100%", color: "#ff0000"}])
-        .enter().append("stop")
-        .attr("offset", function(d) { return d.offset; })
-        .attr("stop-color", function(d) { return d.color; });
-	var statePaths = svg.append("g");
+
+///// Draw States ///// 
+
+	var map = svg.append("g").attr("transform","translate(130,0) scale(1.1)");
+
+	var statePaths = map.append("g");
 	statePaths.selectAll("path").data(states).enter()
 	.append("path").attr("d", path)
 	.style("fill", function (state) { return digitScale(state.Percent); });
@@ -191,10 +228,11 @@ var mapWidth = 960,
 			return Number(state.Id); 
 		});	
 	});
-	var statePaths = svg.append("g");
-	// var stateCircles = svg.append("g");
-	var stateTags = svg.append("g");
-	var mapLegend = svg.append("g");
+
+	var stateTags = map.append("g");
+	var mapLegend = map.append("g");
+
+	///// Initialize State Tags /////
 	stateTags.selectAll("path").data(states).enter()
 	.append("text")
 	.attr("x",function(state){
@@ -222,13 +260,15 @@ var mapWidth = 960,
 	.attr("dominant-baseline","middle");
 	statePaths.selectAll("path").data(states).enter()
 	.append("path").attr("d", path);
-	
+
+	///// CSV Functions /////
 	d3.csv("Graph1Data.csv", function (error, rows) {
 	if (error) {console.log(error);}
 		
 		stateAtlas = d3.map(rows, function (state) { 
 			return Number(state.Id); 
 		});
+		///// Fill States with Coded Color /////
 		statePaths.selectAll("path")
 		.style("fill",
 			function(state) {
@@ -248,6 +288,7 @@ var mapWidth = 960,
 				return "botstate";
 			}
 		})
+		///// Apply Drop Shadow to Top/Bottom 5 States /////
 		.style("filter",
 			function(state){
 				var stateData = stateAtlas.get(state.id);
@@ -261,7 +302,7 @@ var mapWidth = 960,
 					return "none";
 				}
 			});
-		
+		///// Add State Names /////
 		stateTags.selectAll("text")
 		.text(function(text){
 			var stateData = stateAtlas.get(text.id)
@@ -273,7 +314,7 @@ var mapWidth = 960,
 
 		///// Drawing Legend /////
 		var maplegend = svg.append("g")
-			.attr("transform", "translate(55,0)");
+			.attr("transform", "translate(250,0)");
 		maplegend.append("g")
 				  .attr("class", "legendLinear")
 				  .attr("transform", "translate(550,30)");
@@ -289,12 +330,14 @@ var mapWidth = 960,
 					.attr("class", "keyLabel")
 					.attr("x", 550)
 					.attr("y", 20)
-					.text("Percentage Affected by Severe Mental Health")
+					.text("Percentage Affected by Severe Mental Distress")
 					.attr("font-size", "10px");
 	});
 });
 </script>
 </div>
+
+<h3>Mental Health Cases Correlated to Relative Income and Veteran Population</h3>
 
 <!-- /////////////////////////
 		SCATTER PLOT 1
@@ -306,7 +349,7 @@ var mapWidth = 960,
 		///// Defining Dimensions /////
 
 		var scMargin = {top: 20, right: 20, bottom: 30, left: 40}
-		var scatterWidth = 850 - scMargin.left - scMargin.right
+		var scatterWidth = 950 - scMargin.left - scMargin.right
 		var scatterHeight = 400 - scMargin.top - scMargin.bottom
 
 		///// Defining Scales /////
@@ -327,13 +370,15 @@ var mapWidth = 960,
 		///// Creating SVG /////
 
 		var scattersvg = d3.select("body").append("svg")
-			.attr("width", scatterWidth	+ scMargin.left + scMargin.right )
+			.attr("width", scatterWidth	+ scMargin.left + scMargin.right + 200)
 			.attr("height", scatterHeight + scMargin.top + scMargin.bottom )
 			.append ("g")
 				.attr("transform", "translate(" + scMargin.left + "," + scMargin.top + ")");
 
 		var gscatter = scattersvg.append("g")
-			.attr("transform", "translate(100,0) scale(.8)");
+			// .attr("transform", "translate(100,0) scale(.8)");
+
+		scattersvg.attr("transform", "translate(250,0) scale(1.0)");
 
 		///// Formatting Data /////
 
@@ -361,6 +406,7 @@ var mapWidth = 960,
 
 
 			///// Creating Grid Lines /////
+
 			var numTicks = 10
 
 			var yAxisGrid = scatteryAxis.ticks(numTicks)
@@ -440,7 +486,7 @@ var mapWidth = 960,
 				///// Draw Legend /////
 
 				var legend = gscatter.append("g")
-					.attr("transform", "translate(15,0)");
+					.attr("transform", "translate(80,0)");
 
 				legend.append('rect')
 					.attr("class", "keyBox")
@@ -448,7 +494,8 @@ var mapWidth = 960,
 					.attr("y", 0)
 					.attr("width", 300)
 					.attr("height", 150)
-					.attr("fill", "white");
+					.attr("fill", "#181818")
+					.attr("opacity", .7);
 
 				legend.append("g")
 				  .attr("class", "legendSize")
@@ -487,17 +534,17 @@ var mapWidth = 960,
 					.attr("class", "keyLabel")
 					.attr("x", 550)
 					.attr("y", 90)
-					.text("Percentage Affected by Severe Mental Health")
+					.text("Percentage Affected by Severe Mental Distress")
 					.attr("font-size", "10px");
 
 			///// Append Axis Labels /////
 
 			var yaxisLab = gscatter.append("g")
-				.attr("transform", "translate(0,40)");
+				.attr("transform", "translate(-10,40)");
 
 			gscatter.append("text")
 				.attr("class", "axisLabel")
-		        .attr("x", scatterWidth2 / 2 - 200)
+		        .attr("x", scatterWidth2 / 2 - 260)
 		        .attr("y",  scatterHeight2 + scMargin2.bottom + 10)
 		        .text("Percentage With 14 or More Mentally Unhealthy Days (Frequent Mental Distress)")
 		    yaxisLab.append("text")
@@ -513,13 +560,19 @@ var mapWidth = 960,
 <!-- /////////////////////////
 		SCATTER PLOT 2 
 //////////////////////////////-->
+<h2></h2>
+<h3>Mental Health Cases Correlated to Density of Mental Health Workers</h3>
+
+<p id="scatter2Descrip">
+	The density of mental health support refers to the total number of mental health workers to population of each state.
+</p>
 
 <div id="scatter2">
 	<script>
 		///// Defining Dimensions /////
 
 		var scMargin2 = {top: 20, right: 20, bottom: 30, left: 40}
-		var scatterWidth2 = 850 - scMargin2.left - scMargin2.right
+		var scatterWidth2 = 950 - scMargin2.left - scMargin2.right
 		var scatterHeight2 = 400 - scMargin2.top - scMargin2.bottom
 
 		///// Defining Scales /////
@@ -539,13 +592,15 @@ var mapWidth = 960,
 		///// Creating SVG /////
 
 		var scattersvg2 = d3.select("body").append("svg")
-			.attr("width", scatterWidth2	+ scMargin2.left + scMargin2.right )
+			.attr("width", scatterWidth2+ scMargin2.left + scMargin2.right +200)
 			.attr("height", scatterHeight2 + scMargin2.top + scMargin2.bottom )
 			.append ("g")
 				.attr("transform", "translate(" + scMargin2.left + "," + scMargin2.top + ")");
 
 		var gscatter2 = scattersvg2.append("g")
-			.attr("transform", "translate(100,0) scale(.8)");
+			// .attr("transform", "translate(90,0)");
+
+		scattersvg2.attr("transform", "translate(250,0) scale(1.0)");
 
 		///// Formatting Data /////
 
@@ -649,15 +704,17 @@ var mapWidth = 960,
 				.attr("font-size", "8px")
 
 			///// Drawing Legend /////
+
 			var legend2 = gscatter2.append("g")
-					.attr("transform", "translate(15,0)");
+					.attr("transform", "translate(80,0)");
 			legend2.append('rect')
 					.attr("class", "keyBox")
 					.attr("x", 530)
 					.attr("y", 0)
 					.attr("width", 300)
 					.attr("height", 80)
-					.attr("fill", "white");
+					.attr("fill", "#181818")
+					.attr("opacity", .7);
 
 			legend2.append("g")
 				  .attr("class", "legendLinear")
@@ -674,13 +731,13 @@ var mapWidth = 960,
 					.attr("class", "keyLabel")
 					.attr("x", 550)
 					.attr("y", 20)
-					.text("Percentage Affected by Severe Mental Health")
+					.text("Percentage Affected by Severe Mental Distress")
 					.attr("font-size", "10px");
 
 			///// Append Axis Labels /////
 
 			var yaxisLab2 = gscatter2.append("g")
-				.attr("transform", "translate(0,70)");
+				.attr("transform", "translate(-5,95)");
 
 			gscatter2.append("text")
 				.attr("class", "axisLabel")
