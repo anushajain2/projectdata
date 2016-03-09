@@ -11,6 +11,7 @@
 <script src="http://d3js.org/topojson.v1.min.js"></script>
 <!-- Makes great legends -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/1.9.0/d3-legend.js"></script>
+<script src="radar-chart.js"></script>
 
 <style>
 
@@ -27,7 +28,6 @@
 
 	.scxAxis path, .scyAxis path {
 		fill: none;
-		/*stroke: black;*/
 		stroke: #e5e5e5;
 	}
 	.scxAxis text, .scyAxis text {
@@ -36,7 +36,6 @@
 		font-weight: lighter;
 		fill: #e5e5e5; 
 	}
-
 	.topstate{
 	  	stroke: none;
 	}
@@ -128,8 +127,58 @@
 	h3 {
 		font-size: 30px;
 	}
-
-
+	/*********************
+		RADAR STYLING
+	*********************/
+	.radar-container{
+		width:1500;
+		position: relative;
+	}
+	.radarhead{
+		position:absolute;
+		width:-10%;
+		float:left;
+		font-size:10px;
+	}
+	.radarhead{
+		font-size:25px;
+		fill:#e5e5e5;
+	}
+	.radar-chart .area {
+	  fill-opacity: 0.7;
+	}
+	.radar-chart.focus .area {
+	  fill-opacity: 0.3;
+	}
+	.radar-chart.focus text {
+	  font-size:7px;
+	  text-shadow: 0px;
+	}
+	.radar-chart.focus .area.focused {
+	  fill-opacity: 0.5;
+	}
+	.area.currentState1, .currentState .circle {
+	  fill: darkred;
+	  stroke: none;
+	}
+	.area.currentState2, .currentState .circle {
+	  fill: lightgreen;
+	  stroke: none;
+	}
+	.legend.middle{
+	  fill:#e5e5e5;
+	  stroke:none;
+	}
+	.area.overall, .overall .circle {
+		fill: darkblue;
+		stroke: none;
+	}
+	.axis{
+		stroke: white;
+	}
+	</style>
+</head>
+<body>
 
 </style>
 
@@ -145,12 +194,6 @@
 </p>
 
 <div id="map"></div>
-<defs>
-	<linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#fff;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#de2d26;stop-opacity:1" />
-    </linearGradient>
-</defs>
 
 <!-- /////////////////////////
 			US MAP
@@ -753,7 +796,270 @@ var mapWidth = 960,
 
 
 		});
-	</script>
+</script>
+</div>
+<!-- /////////////////////////
+			 RADAR CHARTS
+	//////////////////////////////-->
+<div id="radars">
+<h3> Radar Charts</h3>
+<p> What does a "good" state look like? What about a "bad one?" States with the most mental illness are in red, those with the highest are in green. The US average is in blue for each chart. In our charts, MHW = Mental Health Workers per Thousand, which is distinguished from total Health Worker Density.</p>
+</br>
+<script>
+function filterJSON(json, key, value) {
+  var result = [];
+  for (var state in json) {
+    if (json[state][key] === value) {
+      result.push(json[state]);
+    }
+  }
+  return result;
+}
+
+d3.json("graph.json", function(error, json){
+
+	Top1 = filterJSON(json, 'Id', 54);
+	Top2 = filterJSON(json, 'Id', 21);
+	Top3 = filterJSON(json, 'Id', 40);
+	Top4 = filterJSON(json, 'Id', 35);
+	Top5 = filterJSON(json, 'Id', 1);
+	Bot1 = filterJSON(json, 'Id', 38);
+	Bot2 = filterJSON(json, 'Id', 46);
+	Bot3 = filterJSON(json, 'Id', 19);
+	Bot4 = filterJSON(json, 'Id', 27);
+	Bot5 = filterJSON(json, 'Id', 15);
+	updateChart(Top1, Top2, Top3, Top4, Top5, Bot1, Bot2, Bot3, Bot4, Bot5);
+});
+function updateChart(Top1, Top2, Top3, Top4, Top5, Bot1, Bot2, Bot3, Bot4, Bot5){	
+  
+	Top1.forEach(function(d){
+		PV1 = d.pVeterans;
+		HP1 = (d.Health) * 1000;
+		IN1 = (d.Income) / 10000;
+		MH1 = d.Sum; 
+	});
+
+	Top2.forEach(function(d){
+		PV2 = d.pVeterans;
+		HP2 = (d.Health) * 1000;
+		IN2 = (d.Income) / 10000;
+		MH2 = d.Sum; 
+	});
+	Top3.forEach(function(d){
+		PV3 = d.pVeterans;
+		HP3 = (d.Health) * 1000;
+		IN3 = (d.Income) / 10000;
+		MH3 = d.Sum; 
+	});
+	Top4.forEach(function(d){
+		PV4 = d.pVeterans;
+		HP4 = (d.Health) * 1000;
+		IN4 = (d.Income) / 10000;
+		MH4 = d.Sum; 
+	}); 
+
+    Top5.forEach(function(d){
+		PV5 = d.pVeterans;
+		HP5 = (d.Health) * 1000;
+		IN5 = (d.Income) / 10000;
+		MH5 = d.Sum; 
+	}); 
+
+	Bot1.forEach(function(d){
+		PV6 = d.pVeterans;
+		HP6 = (d.Health) * 1000;
+		IN6 = (d.Income) / 10000;
+		MH6 = d.Sum; 
+	}); 
+	Bot2.forEach(function(d){
+		PV7 = d.pVeterans;
+		HP7 = (d.Health) * 1000;
+		IN7 = (d.Income) / 10000;
+		MH7 = d.Sum; 
+	}); 
+	Bot3.forEach(function(d){
+		PV8 = d.pVeterans;
+		HP8 = (d.Health) * 1000;
+		IN8 = (d.Income) / 10000;
+		MH8 = d.Sum; 
+	}); 
+	Bot4.forEach(function(d){
+		PV9 = d.pVeterans;
+		HP9 = (d.Health) * 1000;
+		IN9 = (d.Income) / 10000;
+		MH9 = d.Sum; 
+	}); 
+	Bot5.forEach(function(d){
+		PV10 = d.pVeterans;
+		HP10 = (d.Health) * 1000;
+		IN10 = (d.Income) / 10000;
+		MH10 = d.Sum; 
+	}); 
+
+var data1 = [
+	{
+    className: 'currentState1',
+    axes: [
+      {indicator: "Percentage of Veterans", value: PV1},
+      {indicator: "Health Workers", value: HP1},
+      {indicator: "Income", value: IN1},
+      {indicator: "MHW1000", value: MH1}
+    ]
+  }
+];
+
+var data2 = [
+	{
+    className: 'currentState1',
+    axes: [
+      {indicator: "Percentage of Veterans", value: PV2},
+      {indicator: "Health Workers", value: HP2},
+      {indicator: "Income", value: IN2},
+      {indicator: "MHW1000", value: MH2}
+    ]
+  }
+];
+
+var data3 = [
+	{
+    className: 'currentState1',
+    axes: [
+      {indicator: "Percentage of Veterans", value: PV3},
+      {indicator: "Health Workers", value: HP3},
+      {indicator: "Income", value: IN3},
+      {indicator: "MHE/1000", value: MH3}
+    ]
+  }
+];
+
+var data4 = [
+	{
+    className: 'currentState1',
+    axes: [
+      {indicator: "Percentage of Veterans", value: PV4},
+      {indicator: "Health Workers", value: HP4},
+      {indicator: "Income", value: IN4},
+      {indicator: "MHW1000", value: MH4}
+    ]
+  }
+];
+
+var data5 = [
+	{
+    className: 'currentState1',
+    axes: [
+      {indicator: "Percentage of Veterans", value: PV5},
+      {indicator: "Health Workers", value: HP5},
+      {indicator: "Income", value: IN5},
+      {indicator: "MHW/1000", value: MH5}
+    ]
+  }
+];
+
+
+var data6 = [
+	{
+    className: 'currentState2',
+    axes: [
+      {indicator: "Percentage of Veterans", value: PV6},
+      {indicator: "Health Workers", value: HP6},
+      {indicator: "Income", value: IN6},
+      {indicator: "MHW1000", value: MH6}
+    ]
+  }
+];
+
+var data7 = [
+	{
+    className: 'currentState2',
+    axes: [
+      {indicator: "Percentage of Veterans", value: PV7},
+      {indicator: "Health Workers", value: HP7},
+      {indicator: "Income", value: IN7},
+      {indicator: "MHW1000", value: MH7}
+    ]
+  }
+];
+
+var data8 = [
+	{
+    className: 'currentState2',
+    axes: [
+      {indicator: "Percentage of Veterans", value: PV8},
+      {indicator: "Health Workers", value: HP8},
+      {indicator: "Income", value: IN8},
+      {indicator: "MHW/1000", value: MH8}
+    ]
+  }
+];
+
+var data9 = [
+	{
+    className: 'currentState2',
+    axes: [
+      {indicator: "Percentage of Veterans", value: PV9},
+      {indicator: "Health Workers", value: HP9},
+      {indicator: "Income", value: IN9},
+      {indicator: "MHW/1000", value: MH9}
+    ]
+  }
+];
+
+var data10 = [
+	{
+    className: 'currentState2',
+    axes: [
+      {indicator: "Percentage of Veterans", value: PV10},
+      {indicator: "Health Workers", value: HP10},
+      {indicator: "Income", value: IN10},
+      {indicator: "MHW/1000", value: MH10}
+    ]
+  }
+];
+
+var PV=7.745;
+var HP=0.00311604 *1000;
+var IN = 40138/10000;
+var MH= 6;
+var dat = [
+	{
+    className: 'overall',
+    axes: [
+      {value: PV},
+      {value: HP},
+      {value: IN},
+      {value: MH}
+    ]
+  }
+];
+
+
+RadarChart.defaultConfig.color = function() {};
+RadarChart.defaultConfig.radius = 1;
+RadarChart.defaultConfig.w = 400;
+RadarChart.defaultConfig.h = 400;
+
+var data = [data1, data2, data3, data4, data5, data6, data7, data8, data9, data10];
+var i=0;
+var radartitle = ["West Virginia","Kentucky","Oklahoma","New Mexico","Alabama","North Dakota","South Dakota","Iowa","Minnesota","Hawaii"];
+while (i<10) {
+var chart = RadarChart.chart();
+var cfg = chart.config(); // retrieve default config
+var svgradar = d3.select('.radar-container').append('svg')
+  .attr('width', RadarChart.defaultConfig.w+100)
+  .attr('height', RadarChart.defaultConfig.h)
+  .attr("display","inline-block");
+svgradar.append('g').classed('single', 1).datum(dat).call(chart);
+svgradar.append('g').classed('single', 1).datum(data[i]).call(chart);
+svgradar.append('text').attr('class','radarhead')
+	.text(radartitle[i]);
+// svg.append('g').classed('single', 1).datum(dat).call(chart);
+i = i+1;
+}
+}
+</script>
+</div>
+<div class="radar-container">
 </div>
 </body>
 </html>
