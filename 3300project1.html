@@ -119,7 +119,7 @@
 	}
 
 	h1 {
-		font-size: 50px;
+		font-size: 60px;
 		color: #e5e5e5;
 		padding: 20 0;
 	}
@@ -131,16 +131,14 @@
 		RADAR STYLING
 	*********************/
 	.radar-container{
-		width:1500;
-		position: relative;
+		width:1100;
+		position: absolute;
+		padding-left: 220px;
 	}
 	.radarhead{
 		position:absolute;
 		width:-10%;
 		float:left;
-		font-size:10px;
-	}
-	.radarhead{
 		font-size:25px;
 		fill:#e5e5e5;
 	}
@@ -158,33 +156,36 @@
 	  fill-opacity: 0.5;
 	}
 	.area.currentState1, .currentState .circle {
-	  fill: darkred;
+	  /*fill: darkred;*/
+	  fill: #660000;
 	  stroke: none;
+	  opacity: .7;
 	}
 	.area.currentState2, .currentState .circle {
-	  fill: lightgreen;
+	  /*fill: lightgreen;*/
+	  fill: #ffae1a;
 	  stroke: none;
+	  opacity: .7;
 	}
 	.legend.middle{
 	  fill:#e5e5e5;
 	  stroke:none;
 	}
 	.area.overall, .overall .circle {
-		fill: darkblue;
+		/*fill: darkblue;*/
+		fill: #9999ff;
 		stroke: none;
+		opacity: .7;
 	}
-	.axis{
-		stroke: white;
+	.radar-container svg {
+		border: 5px solid #181818;
+	}
+
+	text.tooltip {
+		fill: none;
 	}
 	</style>
 </head>
-<body>
-
-</style>
-
-
-</head>
-
 <body>
 <h1>Mental Health at a Glance</h1>
 
@@ -208,7 +209,7 @@ var mapWidth = 960,
 	var path = d3.geo.path().projection(projection);
 		
 	var svg = d3.select("#map").append("svg")
-	    .attr("width", mapWidth + 130)
+	    .attr("width", mapWidth + 190)
 	    .attr("height", mapHeight);
 	var digitScale = d3.scale.category10()
 	var percentScale = d3.scale.linear().domain([1, 9, 15]).range(["#EDE3DE", "#edf8b1", "#ff0000"]);
@@ -258,7 +259,7 @@ var mapWidth = 960,
 
 ///// Draw States ///// 
 
-	var map = svg.append("g").attr("transform","translate(130,0) scale(1.1)");
+	var map = svg.append("g").attr("transform","translate(180,0) scale(1.1)");
 
 	var statePaths = map.append("g");
 	statePaths.selectAll("path").data(states).enter()
@@ -381,6 +382,7 @@ var mapWidth = 960,
 </div>
 
 <h3>Mental Health Cases Correlated to Relative Income and Veteran Population</h3>
+<p>The percentage of the veterans in each state is reflected in the radius of the circles, while the color scheme mirrors that of the above map. Mental health cases are graphed against income, which is normalized for each state's cost of living.</p>
 
 <!-- /////////////////////////
 		SCATTER PLOT 1
@@ -587,7 +589,7 @@ var mapWidth = 960,
 
 			gscatter.append("text")
 				.attr("class", "axisLabel")
-		        .attr("x", scatterWidth2 / 2 - 260)
+		        .attr("x", scatterWidth2 / 2 - 210)
 		        .attr("y",  scatterHeight2 + scMargin2.bottom + 10)
 		        .text("Percentage With 14 or More Mentally Unhealthy Days (Frequent Mental Distress)")
 		    yaxisLab.append("text")
@@ -802,10 +804,11 @@ var mapWidth = 960,
 			 RADAR CHARTS
 	//////////////////////////////-->
 <div id="radars">
-<h3> Radar Charts</h3>
-<p> What does a "good" state look like? What about a "bad one?" States with the most mental illness are in red, those with the highest are in green. The US average is in blue for each chart. In our charts, MHW = Mental Health Workers per Thousand, which is distinguished from total Health Worker Density.</p>
-</br>
+<h3> Characteristics Relating to Mental Health </h3>
+<p> What does a "good" state look like? What about a "bad" one? States with the most mental illness are in red, those with the lowest rates are in orange. The US average is in purple for each chart. In our charts, MHW = Mental Health Workers per Thousand, which we distinguish from the Total Health Worker Density.</p>
+<br>
 <script>
+//// Getting data as a string from a json ////
 function filterJSON(json, key, value) {
   var result = [];
   for (var state in json) {
@@ -815,6 +818,8 @@ function filterJSON(json, key, value) {
   }
   return result;
 }
+
+//// Getting the lowest and highest state's objects ////
 
 d3.json("graph.json", function(error, json){
 
@@ -830,8 +835,13 @@ d3.json("graph.json", function(error, json){
 	Bot5 = filterJSON(json, 'Id', 15);
 	updateChart(Top1, Top2, Top3, Top4, Top5, Bot1, Bot2, Bot3, Bot4, Bot5);
 });
+
+//// Creating the radar charts ////
+
 function updateChart(Top1, Top2, Top3, Top4, Top5, Bot1, Bot2, Bot3, Bot4, Bot5){	
-  
+    
+    //// Getting values for each state ////
+
 	Top1.forEach(function(d){
 		PV1 = d.pVeterans;
 		HP1 = (d.Health) * 1000;
@@ -895,6 +905,8 @@ function updateChart(Top1, Top2, Top3, Top4, Top5, Bot1, Bot2, Bot3, Bot4, Bot5)
 		IN10 = (d.Income) / 10000;
 		MH10 = d.Sum; 
 	}); 
+
+//// Storing values in each data point ////
 
 var data1 = [
 	{
@@ -1017,10 +1029,13 @@ var data10 = [
   }
 ];
 
+//// US Average values (not in dataset to prevent data corruption) ////
+
 var PV=7.745;
 var HP=0.00311604 *1000;
 var IN = 40138/10000;
 var MH= 6;
+
 var dat = [
 	{
     className: 'overall',
@@ -1042,9 +1057,16 @@ RadarChart.defaultConfig.h = 400;
 var data = [data1, data2, data3, data4, data5, data6, data7, data8, data9, data10];
 var i=0;
 var radartitle = ["West Virginia","Kentucky","Oklahoma","New Mexico","Alabama","North Dakota","South Dakota","Iowa","Minnesota","Hawaii"];
+
+//// Makes radar chart for each of the 10 states ////
+
+
+
+
 while (i<10) {
 var chart = RadarChart.chart();
-var cfg = chart.config(); // retrieve default config
+// retrieve default config
+var cfg = chart.config(); 
 var svgradar = d3.select('.radar-container').append('svg')
   .attr('width', RadarChart.defaultConfig.w+100)
   .attr('height', RadarChart.defaultConfig.h)
@@ -1053,7 +1075,6 @@ svgradar.append('g').classed('single', 1).datum(dat).call(chart);
 svgradar.append('g').classed('single', 1).datum(data[i]).call(chart);
 svgradar.append('text').attr('class','radarhead')
 	.text(radartitle[i]);
-// svg.append('g').classed('single', 1).datum(dat).call(chart);
 i = i+1;
 }
 }
